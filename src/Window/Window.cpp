@@ -2,7 +2,7 @@
 #include "Window.hpp"
 #include "../Errors/Errors.hpp"
 #include "../Events/Events.hpp"
-#include "../Graphics/OpenGLContext.hpp"
+#include "../Graphics/OpenGL/OpenGLContext.hpp"
 #include <tracy/Tracy.hpp>
 
 namespace EngineCore

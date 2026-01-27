@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GraphicsContext.hpp"
+#include "../GraphicsContext.hpp"
 
 #include "GL/gl3w.h"
 #include "SDL3/SDL.h"

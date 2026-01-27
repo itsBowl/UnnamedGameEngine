@@ -1,6 +1,5 @@
 #pragma once
 namespace EngineCore
-
 {
     enum CoreEvents
     {

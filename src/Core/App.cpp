@@ -1,6 +1,6 @@
 #include "PCH.hpp"
 #include "App.hpp"
-#include "Graphics/OpenGLContext.hpp"
+#include "../Graphics/OpenGL/OpenGLContext.hpp"
 #include <tracy/Tracy.hpp>
 
 namespace EngineCore

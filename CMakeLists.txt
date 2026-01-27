@@ -30,7 +30,14 @@ FetchContent_MakeAvailable(glm)
 
 file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Common/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/*/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Logging/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Platform/*/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Threading/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Window/*.cpp
 )
 
 include_directories(
