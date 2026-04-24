@@ -49,19 +49,19 @@ static void openGLMessageCallback(GLenum source, GLenum type, GLuint id, GLenum 
     switch (severity)
     {
         case GL_DEBUG_SEVERITY_NOTIFICATION:
-            logSecret("OpenGLNotification", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
+            logWarn("OpenGLNotification", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
             flushLogs();
             break;
         case GL_DEBUG_SEVERITY_LOW:
-            logSecret("OpenGLLow", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
+            logWarn("OpenGLLow", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
             flushLogs();
             break;
 		case GL_DEBUG_SEVERITY_MEDIUM:
-            logSecret("OpenGLMedium", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
+            logWarn("OpenGLMedium", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
             flushLogs();
             break;
 		case GL_DEBUG_SEVERITY_HIGH:
-            logSecret("OpenGLHigh", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
+            logWarn("OpenGLHigh", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
             flushLogs();
             break;
     }
@@ -69,7 +69,7 @@ static void openGLMessageCallback(GLenum source, GLenum type, GLuint id, GLenum 
 
 namespace EngineCore
 {
-    const std::string LOGGER_TAG = "Graphics";
+    static const std::string LOGGER_TAG = "Graphics";
 
     OpenGLContext::OpenGLContext(SDL_Window* w): window(w) {}
 

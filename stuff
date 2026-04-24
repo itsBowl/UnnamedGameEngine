@@ -1,0 +1,23 @@
+class Unit:
+{
+    def __init__(self, n, s, w)
+        self.name = n
+        self.stamina = s
+        self.wounds = w
+
+    def info(self)
+        print(self.name, " ", self.stamina, " ", self.wounds)
+}
+
+class Pawn(Unit): //this means pawn inherets from unit
+{
+    //holds anything specific to pawns but not specific to unit
+}
+
+pawn = Pawn("grunt", 1, 1)
+pawn.info() //this will print "Grunt 1 1 "
+
+class weapon()
+{
+
+}

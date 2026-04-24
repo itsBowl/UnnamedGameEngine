@@ -7,7 +7,7 @@
 
 namespace EngineCore
 {
-    const std::string LOGGER_TAG = "Window";
+    static const std::string LOGGER_TAG = "Window";
     int Window::init()
     {
         logInfo(LOGGER_TAG, "Initialising SDL");
@@ -20,6 +20,8 @@ namespace EngineCore
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetSwapInterval(0);
 
         if (SDL_GL_CreateContext(window) == NULL)
         {
@@ -27,10 +29,9 @@ namespace EngineCore
             return CoreErrors::SDL_FAILED_TO_CREATE_CONTEXT;
         }
 
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetSwapInterval(0);
+        
         flushLogs();
-        if (!initGraphics())
+        if (initGraphics() != GraphicsErrors::GRAPHICS_OK)
         {
             return CoreErrors::GRAPHICS_FAILED_TO_INIT;
         }
@@ -44,6 +45,11 @@ namespace EngineCore
         return context->init();
     }
 
+    void Window::swapBuffers()
+    {
+        context->swapBuffers();
+    }
+
     int Window::update()
     {
         ZoneScoped;
@@ -54,5 +60,6 @@ namespace EngineCore
                 return CoreEvents::QUIT;
         }
         context->swapBuffers();
+        return CoreEvents::NONE;
     }
 }

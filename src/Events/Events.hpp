@@ -5,6 +5,7 @@ namespace EngineCore
     {
         NONE = 0,
         QUIT,
+        
     };
     
 };
