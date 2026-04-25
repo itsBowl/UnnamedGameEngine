@@ -69,7 +69,6 @@ namespace EngineCore
             render.clear();
             render3d.bindShader();
             render.drawIndexed(render3d.getTri(), render3d.getTri().getIndexCount());
-            //render.drawArrays(render3d.getTri(), 3);
             render.endFrame();
             window.swapBuffers();
             flushLogs();

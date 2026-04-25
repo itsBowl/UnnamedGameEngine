@@ -40,14 +40,14 @@ private:
     enum ShaderType
     {
         SHADER_TYPE_NONE = 0,
+        SHADER_TYPE_PROGRAM = 0x1,
         SHADER_TYPE_FRAGMENT = 0x8B30,
         SHADER_TYPE_VERTEX = 0x8B31,
-        SHADER_TYPE_PROGRAM = 0x82E2
     };
     GLuint id;
-    ShaderError err;
+    ShaderErrors shaderErrorCode;
     GLuint compileStage(const std::vector<char>& src, GLenum type);
-    int checkShaderCompileStatus(GLuint shader);
+    ShaderErrors checkShaderCompileStatus(GLuint shader);
     ShaderType getShaderType(GLuint shader);
 };
 

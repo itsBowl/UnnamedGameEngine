@@ -18,7 +18,7 @@ namespace EngineCore
         void setIndexBuffer(const IndexBuffer& ibo);
 
         bool exists() const { return id != 0; }
-        bool getIndexCount() const { return indexCount; }
+        int getIndexCount() const { return indexCount; }
     private:
         uint32_t id = 0;
         uint32_t attributeIndex = 0;

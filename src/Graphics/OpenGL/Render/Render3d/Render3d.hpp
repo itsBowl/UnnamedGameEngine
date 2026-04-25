@@ -18,6 +18,8 @@ namespace EngineCore
 
         VertexArray& getTri();
         void bindShader();
+        void bindArray() { triArray.bind(); }
+        void renderTri();
         void setupTri();
 
     private:

@@ -43,4 +43,13 @@ namespace EngineCore
         logInfo(LOGGER_TAG, "Rendering triangle");
         return triArray;
     }
+
+    void Render3d::renderTri()
+    {
+        glClearColor(1.f, .1f, .3f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        shader.bind();
+        triArray.bind();
+        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+    }
 }

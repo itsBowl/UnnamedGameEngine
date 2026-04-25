@@ -27,8 +27,18 @@ namespace EngineCore
         if (!FM::readFile(vp, &vc)) { return ShaderErrors::SHADER_FAILED_READ_VS; }
         if (!FM::readFile(fp, &fc)) { return ShaderErrors::SHADER_FAILED_READ_FS; }
 
+        vc.push_back('\0');
+        fc.push_back('\0');
         auto vs = compileStage(vc, GL_VERTEX_SHADER);
+        if (shaderErrorCode != ShaderErrors::SHADER_OK)
+        {
+            logError(LOGGER_TAG, "vertex shader failed");
+        }
         auto fs = compileStage(fc, GL_FRAGMENT_SHADER);
+        if (shaderErrorCode != ShaderErrors::SHADER_OK)
+        {
+            logError(LOGGER_TAG, "fragment shader failed");
+        }
 
 
         
@@ -36,11 +46,15 @@ namespace EngineCore
         glAttachShader(id, fs);
         glLinkProgram(id);
 
-        int status = checkShaderCompileStatus(id);
+        shaderErrorCode = checkShaderCompileStatus(id);
+        if (shaderErrorCode != ShaderErrors::SHADER_OK)
+        {
+            logError(LOGGER_TAG, "Link Failed");
+        }
         glDeleteShader(vs);
         glDeleteShader(fs);
 
-        return status;
+        return shaderErrorCode;
     }
 
     GLuint Shader::compileStage(const std::vector<char>& src, GLenum type)
@@ -49,12 +63,12 @@ namespace EngineCore
         const char* srcPtr = src.data();
         glShaderSource(shader, 1, &srcPtr, nullptr);
         glCompileShader(shader);
-        err = checkShaderCompileStatus(shader);
+        shaderErrorCode = checkShaderCompileStatus(shader);
         flushLogs();
         return shader;
     }
 
-    int Shader::checkShaderCompileStatus(GLuint shader)
+    ShaderErrors Shader::checkShaderCompileStatus(GLuint shader)
     {
         GLint res = GL_FALSE;
         ShaderType shaderType = getShaderType(shader);
@@ -100,15 +114,17 @@ namespace EngineCore
 
     Shader::ShaderType Shader::getShaderType(GLuint shader)
     {
-        int type;
+        if (glIsProgram(shader))
+            return ShaderType::SHADER_TYPE_PROGRAM;
+
         if (glIsShader(shader))
         {
+            int type;
             glGetShaderiv(shader, GL_SHADER_TYPE, &type);
+            return static_cast<ShaderType>(type);
         }
-        else
-        {
-            type = GL_PROGRAM;
-        }
-        return static_cast<ShaderType>(type);
+
+        logError(LOGGER_TAG, "getShaderType called with invalid id=", shader);
+        return ShaderType::SHADER_TYPE_NONE;
     }
 }

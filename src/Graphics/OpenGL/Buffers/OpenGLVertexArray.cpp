@@ -49,6 +49,8 @@ namespace EngineCore
                     reinterpret_cast<const void*>(e.offset)
                 );
             }
+            glEnableVertexAttribArray(attributeIndex);
+            attributeIndex++;
         }
 
     }
