@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <glm/glm.hpp>
 #include <GL/gl3w.h>
 #include "Graphics/OpenGL/Buffers/OpenGLVertexArray.hpp"
 #include "Graphics/OpenGL/Shader/Shader.hpp"

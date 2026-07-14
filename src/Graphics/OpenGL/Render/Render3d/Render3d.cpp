@@ -10,22 +10,18 @@ namespace EngineCore
         //could be setting clearcolour but the render system shoudl handle that itself
     }
 
-    void Render3d::bindShader()
-    {
-        shader.bind();
-    }
-
     void Render3d::setupTri()
     {
         BufferLayout layout{
-            BufferElement(ShaderDataType::Float3, "a_Position")
+            BufferElement(ShaderDataType::Float3, "a_Position"),
+            BufferElement(ShaderDataType::Float3, "a_VertexColour"),
         };
         triArray.create();
-        glm::vec3 verts [3] = 
+        glm::vec3 verts [6] = 
         {
-            glm::vec3(-.5f, -.5f, .0f),
-            glm::vec3(.5f, -.5f, .0f),
-            glm::vec3(.0f, .5f, .0f),
+            glm::vec3(-.5f, -.5f, .0f), glm::vec3(1.f, 0.f, 0.f),
+            glm::vec3(.5f, -.5f, .0f), glm::vec3(0.f, 1.f, 0.f),
+            glm::vec3(.0f, .5f, .0f), glm::vec3(0.f, 0.f, 1.f),
         };
         triBuffer.create(verts, sizeof(verts));
         uint32_t idx[3] = {0, 1, 2};
@@ -35,7 +31,7 @@ namespace EngineCore
         triArray.addVertexBuffer(triBuffer, layout);
         triArray.setIndexBuffer(triIndex);
 
-        shader.load("../Assets/Shaders/Basic/vertex.vert", "../Assets/Shaders/Basic/fragment.frag");
+        
     }
 
     VertexArray& Render3d::getTri()

@@ -5,7 +5,7 @@
 
 namespace EngineCore
 {
-    static const uint32_t maxFramebuffersize = 8192;
+    static const uint32_t maxFramebufferSize = 8192;
     static const std::string LOGGER_TAG = "Framebuffer";
 
     Framebuffer::Framebuffer(const FramebufferSpecification& s)
@@ -56,7 +56,7 @@ namespace EngineCore
 
     void Framebuffer::resize(uint32_t w, uint32_t h)
     {
-        if (w == 0 || h == 0 ||w > maxFramebuffersize || h > maxFramebuffersize)
+        if (w == 0 || h == 0 ||w > maxFramebufferSize || h > maxFramebufferSize)
         {
             logWarn(LOGGER_TAG, "Framebuffer size incorrect! ", w, " ", h);
             return;

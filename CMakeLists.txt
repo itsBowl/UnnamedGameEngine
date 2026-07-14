@@ -42,6 +42,7 @@ file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/OpenGL/*/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/OpenGL/Render/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/OpenGL/Render/Render3d/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Assets/Camera/*.cpp
 
     
 )
@@ -59,6 +60,7 @@ include_directories(
     "${CMAKE_SOURCE_DIR}/src/Common"
     "${CMAKE_SOURCE_DIR}/src/App"
     "${CMAKE_SOURCE_DIR}/src/Errors"
+    "${CMAKE_SOURCE_DIR}/src/Core/Assets/Camera"
     
 )
 
@@ -67,6 +69,8 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/3rdParty/GL")
 
 
 add_executable(Engine ${ENGINE_SOURCES})
+
+target_precompile_headers(Engine PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_SOURCE_DIR}/src/PCH.hpp>")
 
 
 

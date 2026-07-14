@@ -17,7 +17,6 @@ namespace EngineCore
         void preprocessing();
 
         VertexArray& getTri();
-        void bindShader();
         void bindArray() { triArray.bind(); }
         void renderTri();
         void setupTri();

@@ -5,7 +5,7 @@
 
 namespace EngineCore
 {
-    Camera::Camera(InputHandler& i, Window& w) : input(i), window(w)
+    Camera::Camera(InputHandler& i, UpdateSystem& u, Window& w) : IUpdate(u), input(i), window(w)
     {
         mouseMoveEvent = InputListener(&input, (EngineCore::ListenerID)input.onMouseMoved([this](const MouseMoveEvent& e)
         {
@@ -37,9 +37,29 @@ namespace EngineCore
 
     }
 
+    void Camera::createUBO()
+    {
+        glGenBuffers(1, &ubo);
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(UBO), nullptr, GL_DYNAMIC_DRAW);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo);
+    }
+
+    void Camera::updateUBO()
+    {
+        uboData.view = view;
+        uboData.proj = projection;
+        uboData.pos = glm::vec4(position, 1.0);
+
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UBO), &uboData);
+    }
+
 
     void Camera::onUpdate()
     {
+
+        float speedScalar = 0.03f; // get frametime
         const glm::vec2& mouse{input.getMouseX(), input.getMouseY()};
         glm::vec2 delta = mouse - mPos;
 
@@ -50,21 +70,42 @@ namespace EngineCore
         up = glm::vec3(0, 1, 0);
         side = glm::vec3(1, 0, 0);
 
-        lookAt = glm::rotate(-yaw, glm::vec3(0, 1, 0)) * glm::rotate(-pitch, glm::vec3(1, 0, 0));
+        glm::vec3 cameraFront = glm::vec3(
+            glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch)),
+            glm::sin(glm::radians(pitch)),
+            glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch))
+        );
+        
+        forward = glm::normalize(cameraFront);
+        side = glm::normalize(glm::cross(forward, glm::vec3(0, 1, 0)));
 
-        forward = lookAt * glm::vec4(forward, 1.f);
-        side = glm::normalize(glm::cross(up, forward));
-        up = glm::normalize(glm::cross(forward, up));
+        moveDirection = glm::vec3(0.f);
+        //update these so they can be set by the user? or maybe that's a thing for the player controller?
+        if (input.isKeyHeld(SDL_SCANCODE_W)) moveDirection += forward;
+        if (input.isKeyHeld(SDL_SCANCODE_S)) moveDirection -= forward;
+        if (input.isKeyHeld(SDL_SCANCODE_D)) moveDirection += side;
+        if (input.isKeyHeld(SDL_SCANCODE_A)) moveDirection -= side;
+        moveDirection = glm::normalize(moveDirection);
 
-        float speedScalar = 0.03f; // get frametime
-
-        //our movement is already handled by subscribing to the listeners when we created the camera
-        position += moveDirection;
-
-        projection = glm::perspective(glm::radians(fov), (float)16/(float)9, .1f, 100.f);
-        view = lookAt * glm::translate(position);
+        position += moveDirection * speedScalar;
         
 
+        
 
+        //lookAt = glm::rotate(-yaw, glm::vec3(0, 1, 0)) * glm::rotate(-pitch, glm::vec3(1, 0, 0));
+        //forward = lookAt * glm::vec4(forward, 1.f);
+        //side = glm::normalize(glm::cross(up, forward));
+        //up = glm::normalize(glm::cross(forward, up));
+
+        
+
+        //our movement is already handled by subscribing to the listeners when we created the camera
+        //position += moveDirection;
+
+        //move some of the magic numbers here to be relative to the current resolution, but for now it's fine
+        projection = glm::perspective(glm::radians(fov), (float)16/(float)9, .1f, 100.f);
+        view = glm::lookAt(position, position + forward, up);
+
+        updateUBO();
     }
 }

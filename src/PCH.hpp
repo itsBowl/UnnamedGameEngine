@@ -13,4 +13,9 @@
 #include <unordered_set>
 #include <unordered_map>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <magic_enum/magic_enum.hpp>
 #include "Logging/Logger2.hpp"

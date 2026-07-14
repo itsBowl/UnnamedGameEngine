@@ -1,4 +1,3 @@
-#include "PCH.hpp"
 #include "App.hpp"
 #include "../Graphics/OpenGL/OpenGLContext.hpp"
 #include <tracy/Tracy.hpp>
@@ -24,8 +23,9 @@ namespace EngineCore
         inputHandler.init();
         render.init();
         render.setClearColour(glm::vec4(0.2f, .02f, 0.2f, 1.f));
-        render.setDepthTest(false);
-        glDisable(GL_CULL_FACE);
+        render.setDepthTest(true);
+        shaderLib.load("../Assets/Shaders/Basic");
+        
 
         inputHandler.onKeyPressed([this](const KeyEvent& e)
         {
@@ -45,6 +45,18 @@ namespace EngineCore
     {
         init();
         render3d.setupTri();
+        shaderLib.debugPrintShaders();
+        int value = 1;
+        InputListener testListnere = InputListener(&inputHandler, (EngineCore::ListenerID)inputHandler.onKeyPressed([&](const KeyEvent& e)
+            {
+                if (e.scancode == SDL_SCANCODE_1)
+                {
+                    value += 1;
+                    if (value > 3) value = 1;
+                }
+            }
+        ));
+
 
         while (running)
         {
@@ -67,8 +79,11 @@ namespace EngineCore
             //render loop
             render.beginFrame();
             render.clear();
-            render3d.bindShader();
+            auto shader = shaderLib.get("Basic").get();
+            shader->bind();
+            shader->setInt("test", value);
             render.drawIndexed(render3d.getTri(), render3d.getTri().getIndexCount());
+            shader->unbind();
             render.endFrame();
             window.swapBuffers();
             flushLogs();
@@ -106,7 +121,7 @@ namespace EngineCore
     void App::onMouseMoved(const MouseMoveEvent& e)
     {
         //tmp
-        logInfo("ENGINE_CORE", "Mouse moved: ", e.dx, ", ", e.dy);
+        //logInfo("ENGINE_CORE", "Mouse moved: ", e.dx, ", ", e.dy);
     }
 
 }

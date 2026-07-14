@@ -1,11 +1,62 @@
 #include "Shader.hpp"
 #include "FileManagement.hpp"
 #include "Errors.hpp"
-#include <magic_enum/magic_enum.hpp>
 
 namespace EngineCore
 {
     static const std::string LOGGER_TAG = "SHADER";
+
+    Shader::Shader(const std::string& fp)
+    {
+        name = fp.substr(fp.find_last_of('/') + 1);
+        namespace FM = FileManagement;
+        std::vector<std::pair<std::string, std::string>> fps;
+        if (!FM::getFilesInFolder(&fps, fp))
+        {
+            logError(LOGGER_TAG, "Failed to load shader from: ", fp);
+            return;
+        }
+        
+        //do some filepath size checks here if wanted
+
+        std::string frag, vert;
+
+        for (auto& e : fps)
+        {
+            if (e.second == ".frag") frag = e.first;
+            else if (e.second == ".vert") vert = e.first;
+        }
+
+        int ret = load(vert, frag);
+        if (ret != ShaderErrors::SHADER_OK)
+        {
+            logError(LOGGER_TAG, "Shader error in loading");
+        }
+    }
+
+    void Shader::setInt(const std::string& name, int v) const
+    {
+        glUniform1i(glGetUniformLocation(id, name.c_str()), (GLint)v);
+    }
+    void Shader::setFloat(const std::string& name, float v) const
+    {
+        glUniform1f(glGetUniformLocation(id, name.c_str()), GLfloat(v));
+    }
+    void Shader::setVec2(const std::string& name, glm::vec2 v) const
+    {
+        glUniform2fv(glGetUniformLocation(id, name.c_str()), 1, glm::value_ptr(v));
+    }
+    void Shader::setVec4(const std::string& name, glm::vec4 v) const
+    {
+        glUniform4fv(glGetUniformLocation(id, name.c_str()), 1, glm::value_ptr(v));
+    }
+    void Shader::setMat4(const std::string& name, glm::mat4 v) const
+    {
+        glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, glm::value_ptr(v));
+    }
+
+    
+
     void Shader::bind() const
     {
         glUseProgram(id);
@@ -54,7 +105,7 @@ namespace EngineCore
         glDeleteShader(vs);
         glDeleteShader(fs);
 
-        return shaderErrorCode;
+        return ShaderErrors::SHADER_OK;
     }
 
     GLuint Shader::compileStage(const std::vector<char>& src, GLenum type)
@@ -96,7 +147,7 @@ namespace EngineCore
                 std::string src((srcLen > 1) ? srcLen : 1, '\0');
                 glGetShaderSource(shader, srcLen, NULL, src.data());
 
-                logError(LOGGER_TAG, src, "\nError compiling shader!\n\n", error);
+                logError(LOGGER_TAG, "\n", src, "\nError compiling shader!\n\n", error);
                 return ShaderErrors::SHADER_FAILED_COMPILE;
             }
             else
@@ -117,7 +168,7 @@ namespace EngineCore
         if (glIsProgram(shader))
             return ShaderType::SHADER_TYPE_PROGRAM;
 
-        if (glIsShader(shader))
+        else if (glIsShader(shader))
         {
             int type;
             glGetShaderiv(shader, GL_SHADER_TYPE, &type);
