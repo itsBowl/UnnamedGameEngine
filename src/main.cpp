@@ -3,25 +3,21 @@
 #include "Core/App.hpp"
 #include "Logging/Logger.hpp"
 #include "Logging/Logger2.hpp"
-#include "Threading/threading.hpp"
+#include "Threading/threadpool.hpp"
 #include "confirmACSII.hpp"
 
-
+static EngineCore::logger logger;
 
 
 int main(int argc, char** argv)
 {
     
-    EngineCore::createThreadpool();
-
-    setLogLevel(LogLevel::ALL);
+    EngineCore::threadpool threads(4);
+    logger.set_log_level(EngineCore::logger::log_level::ALL);
     std::cout << "\x1b[44m \x1b[37m" << confirm << "\x1b[0m" << std::endl;
     EngineCore::App* app = new EngineCore::App();
     app->run();
-
-    EngineCore::releaseThreadpool();
-
     delete app;
-    
+
     return 0;
 }

@@ -48,7 +48,7 @@ namespace EngineCore
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
-            logError(LOGGER_TAG, "Framebuffer imcomplete");
+            Log::error(LOGGER_TAG, "Framebuffer imcomplete");
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -58,7 +58,7 @@ namespace EngineCore
     {
         if (w == 0 || h == 0 ||w > maxFramebufferSize || h > maxFramebufferSize)
         {
-            logWarn(LOGGER_TAG, "Framebuffer size incorrect! ", w, " ", h);
+            Log::warn(LOGGER_TAG, "Framebuffer size incorrect! ", w, " ", h);
             return;
         }
         spec.width = w;

@@ -6,6 +6,7 @@
 
 namespace EngineCore
 {
+    /*
     std::string stringify_utf32(const u32 codepoint);
 
     [[nodiscard]] std::string stringify_duration(const std::chrono::microseconds duration);
@@ -22,4 +23,5 @@ namespace EngineCore
         (format_stream << ... << values);
         return format_stream.str();
     }
+    */
 }

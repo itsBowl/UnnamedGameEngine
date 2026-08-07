@@ -1,32 +1,48 @@
 #include "OpenGLVertexArray.hpp"
+#include "Buffers/IVertexBuffer.hpp"
+#include "Buffers/IIndexBuffer.hpp"
+#include "OpenGLVertexBuffer.hpp"
+#include "OpenGLIndexBuffer.hpp"
+#include "OpenGLDataTypes.hpp"
+
 
 namespace EngineCore
 {
     static const std::string LOGGER_TAG = "Vertex Array";
 
-    //Creates a vertex array, does not bind
-    void VertexArray::create()
+    OpenGLVertexArray::OpenGLVertexArray()
     {
-        glGenVertexArrays(1, &id);
-        logInfo(LOGGER_TAG, "Created VAO: ", id);
+        create();
     }
 
-    void VertexArray::bind() const
+    OpenGLVertexArray::~OpenGLVertexArray()
+    {
+        destroy();
+    }
+
+    //Creates a vertex array, does not bind
+    void OpenGLVertexArray::create()
+    {
+        glGenVertexArrays(1, &id);
+        Log::info(LOGGER_TAG, "Created VAO: ", id);
+    }
+
+    void OpenGLVertexArray::bind() const
     {
         glBindVertexArray(id);
     }
 
-    void VertexArray::unbind() const
+    void OpenGLVertexArray::unbind() const
     {
         glBindVertexArray(0);
     }
 
-    void VertexArray::addVertexBuffer(const VertexBuffer& vbo, const BufferLayout& layout)
+    void OpenGLVertexArray::addVertexBuffer(std::shared_ptr<IVertexBuffer> vbo, const BufferLayout& layout)
     {
         bind();
-        vbo.bind();
+        vbo->bind();
 
-        for (const auto& e : layout.getElements())
+        for (const BufferElement& e : layout.getElements())
         {
             GLenum type = shaderDataTypeOpenGL(e.type);
             uint32_t comps = shaderDataTypeComponentCount(e.type);
@@ -52,21 +68,23 @@ namespace EngineCore
             glEnableVertexAttribArray(attributeIndex);
             attributeIndex++;
         }
+        vertexBuffer = vbo;
 
     }
 
-    void VertexArray::setIndexBuffer(const IndexBuffer& ibo)
+    void OpenGLVertexArray::addIndexBuffer(std::shared_ptr<IIndexBuffer> ibo)
     {
         bind();
-        ibo.bind();
-        indexCount = ibo.getCount();
+        ibo->bind();
+        indexBuffer = ibo;
+        indexCount = ibo->getCount();
     }
 
-    void VertexArray::destroy()
+    void OpenGLVertexArray::destroy()
     {
         if(exists())
         {
-            logInfo(LOGGER_TAG, "Destorying VAO: ", id);
+            Log::info(LOGGER_TAG, "Destorying VAO: ", id);
             glDeleteVertexArrays(1, &id);
             id = 0;
         }

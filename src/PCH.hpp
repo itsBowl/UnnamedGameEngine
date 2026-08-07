@@ -18,4 +18,4 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <magic_enum/magic_enum.hpp>
-#include "Logging/Logger2.hpp"
+#include "Logging/Log.hpp"

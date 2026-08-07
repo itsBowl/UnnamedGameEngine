@@ -1,6 +1,5 @@
 #pragma once
 #include "PCH.hpp"
-#include <GL/gl3w.h>
 
 namespace EngineCore
 {
@@ -27,23 +26,6 @@ namespace EngineCore
             case ShaderDataType::Bool:   return 1;
         }
         return 0;
-    }
-
-    static GLenum shaderDataTypeOpenGL(ShaderDataType t)
-    {
-        switch (t)
-        {
-            case ShaderDataType::Float:
-            case ShaderDataType::Float2:
-            case ShaderDataType::Float3:
-            case ShaderDataType::Float4: return GL_FLOAT;
-            case ShaderDataType::Int:
-            case ShaderDataType::Int2:
-            case ShaderDataType::Int3:
-            case ShaderDataType::Int4:   return GL_INT;
-            case ShaderDataType::Bool:   return GL_BOOL;
-        }
-        return GL_NONE;
     }
 
     static uint32_t shaderDataTypeComponentCount(ShaderDataType t)

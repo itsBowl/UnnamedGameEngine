@@ -3,12 +3,16 @@
 #include "Events/Events.hpp"
 #include "Errors/Errors.hpp"
 #include "Graphics/GraphicsContext.hpp"
-#include "Graphics/OpenGL/Render/Render.hpp"
+#include "Graphics/Render/IRender.hpp"
 #include "IO/InputHandler.hpp"
 #include "IO/InputListener.hpp"
-#include "Render/Render3d/Render3d.hpp"
+
 #include "Shader/ShaderLib.hpp"
 #include "UpdateSystem.hpp"
+#include "Time.hpp"
+#include "Graphics/Camera/Camera.hpp"
+
+#include "Asset/Mesh/Mesh.hpp"
 
 int main(int argc, char** argv);
 
@@ -29,10 +33,11 @@ namespace EngineCore
         void onMouseMoved(const MouseMoveEvent& e);
 
         Window window;
+        Time time;
         InputHandler inputHandler;
         UpdateSystem updateSystem;
-        Render render;
-        Render3d render3d;
+        std::unique_ptr<IRender> render;
+        Mesh triangleMesh;
         ShaderLibrary shaderLib;
         bool running = false;
 

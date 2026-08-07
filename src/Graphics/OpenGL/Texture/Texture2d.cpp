@@ -15,7 +15,7 @@ namespace EngineCore
 
         if (!data)
         {
-            logError(LOGGER_TAG, "Failed to load texture: ", path, " -- ", stbi_failure_reason());
+            Log::error(LOGGER_TAG, "Failed to load texture: ", path, " -- ", stbi_failure_reason());
             return TextureErrors::TEXTURE_FAILED_TO_LOAD;
         }
 
@@ -45,7 +45,7 @@ namespace EngineCore
 
         stbi_image_free(data);
 
-        logInfo(LOGGER_TAG, "Loaded texture id: ", id, " from path: ", path);
+        Log::info(LOGGER_TAG, "Loaded texture id: ", id, " from path: ", path);
 
         return TextureErrors::TEXTURE_OK;
     }
@@ -65,7 +65,7 @@ namespace EngineCore
     {
         if (exists())
         {
-            logInfo(LOGGER_TAG, "Destorying texture: ", id);
+            Log::info(LOGGER_TAG, "Destorying texture: ", id);
             glDeleteTextures(1, &id);
             id = 0;
         }

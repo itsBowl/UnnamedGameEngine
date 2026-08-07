@@ -1,6 +1,5 @@
 #include "PCH.hpp"
 #include "OpenGLContext.hpp"
-#include "Logging/Logger2.hpp"
 #include "Errors/Errors.hpp"
 
 
@@ -49,20 +48,20 @@ static void openGLMessageCallback(GLenum source, GLenum type, GLuint id, GLenum 
     switch (severity)
     {
         case GL_DEBUG_SEVERITY_NOTIFICATION:
-            logWarn("OpenGLNotification", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
-            flushLogs();
+            EngineCore::Log::warn("OpenGLNotification", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
+            EngineCore::Log::flush();
             break;
         case GL_DEBUG_SEVERITY_LOW:
-            logWarn("OpenGLLow", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
-            flushLogs();
+            EngineCore::Log::warn("OpenGLLow", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
+            EngineCore::Log::flush();
             break;
 		case GL_DEBUG_SEVERITY_MEDIUM:
-            logWarn("OpenGLMedium", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
-            flushLogs();
+            EngineCore::Log::warn("OpenGLMedium", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
+            EngineCore::Log::flush();
             break;
 		case GL_DEBUG_SEVERITY_HIGH:
-            logWarn("OpenGLHigh", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
-            flushLogs();
+            EngineCore::Log::warn("OpenGLHigh", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
+            EngineCore::Log::flush();
             break;
     }
 }
@@ -75,15 +74,15 @@ namespace EngineCore
 
     int OpenGLContext::init()
     {
-        logInfo(LOGGER_TAG, "Initialise gl3w");
+        Log::info(LOGGER_TAG, "Initialise gl3w");
         if (gl3wInit() != GL3W_OK)
         {
             int err = GetLastError();
-            logFatal(LOGGER_TAG, "Failed to intitialise gl3w: ", err);
-            flushLogs();
+            Log::fatal(LOGGER_TAG, "Failed to intitialise gl3w: ", err);
+            Log::flush();
             return GraphicsErrors::GRAPHICS_GL3W_FAILED_TO_INIT;
         }
-        flushLogs();
+        Log::flush();
         glEnable(GL_DEBUG_OUTPUT);
         glDebugMessageCallback(openGLMessageCallback, nullptr);
         glEnable(GL_CULL_FACE);
@@ -96,6 +95,6 @@ namespace EngineCore
     void OpenGLContext::swapBuffers()
     {
         SDL_GL_SwapWindow(window);
-        logInfo(LOGGER_TAG, "Swapped buffers");
+        //Log::info(LOGGER_TAG, "Swapped buffers");
     }
 }

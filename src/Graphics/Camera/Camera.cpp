@@ -1,12 +1,15 @@
 #include "PCH.hpp"
 #include "IO/InputListener.hpp"
 #include "Camera.hpp"
+#include "Logging/Log.hpp"
 
 
 namespace EngineCore
 {
-    Camera::Camera(InputHandler& i, UpdateSystem& u, Window& w) : IUpdate(u), input(i), window(w)
+    static const std::string LOGGER_TAG = "GraphicsCamera";
+    Camera::Camera(InputHandler& i, Window& w) :input(i), window(w)
     {
+        /* old mouse code, keeping as ref for how events can be set up
         mouseMoveEvent = InputListener(&input, (EngineCore::ListenerID)input.onMouseMoved([this](const MouseMoveEvent& e)
         {
             yaw += e.dx * sensitivity;
@@ -33,7 +36,35 @@ namespace EngineCore
                 case SDL_SCANCODE_A: moveDirection -= glm::vec3(0, 0, 1); break;
                 case SDL_SCANCODE_D: moveDirection += glm::vec3(0, 0, 1); break;
             }
-        })); 
+        }));
+        */
+        
+        mouseClickEvent = InputListener(&input, (EngineCore::ListenerID)input.onMousePressed([this](const MouseEvent& e)
+        {
+            if (e.button == SDL_BUTTON_RIGHT)
+            {
+                rotate = true;
+            }
+        }));
+
+        mouseReleaseEvent = InputListener(&input, (EngineCore::ListenerID)input.onMouseReleased([this](const MouseEvent& e)
+        {
+            if (e.button == SDL_BUTTON_RIGHT)
+            {
+                rotate = false;
+            }
+        }));
+
+        mouseMoveEvent = InputListener(&input, (EngineCore::ListenerID)input.onMouseMoved([this](const MouseMoveEvent& e)
+        {
+            if (!rotate) return;
+
+            yaw += e.dx;
+            pitch -= e.dy;
+            pitch = glm::clamp(pitch, -89.f, 89.f);
+        }));
+        
+        createUBO();
 
     }
 
@@ -53,17 +84,14 @@ namespace EngineCore
 
         glBindBuffer(GL_UNIFORM_BUFFER, ubo);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UBO), &uboData);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
 
-    void Camera::onUpdate()
+    void Camera::onUpdate(float dT)
     {
-
-        float speedScalar = 0.03f; // get frametime
-        const glm::vec2& mouse{input.getMouseX(), input.getMouseY()};
-        glm::vec2 delta = mouse - mPos;
-
-        mPos = mouse;
+        Log::info(LOGGER_TAG, "Camera Update");
+        float speed = 3.f; // get frametime
 
         glm::mat4 lookAt;
         forward = glm::vec3(0, 0, -1);
@@ -78,6 +106,7 @@ namespace EngineCore
         
         forward = glm::normalize(cameraFront);
         side = glm::normalize(glm::cross(forward, glm::vec3(0, 1, 0)));
+        up = glm::normalize(glm::cross(side, forward));
 
         moveDirection = glm::vec3(0.f);
         //update these so they can be set by the user? or maybe that's a thing for the player controller?
@@ -85,19 +114,19 @@ namespace EngineCore
         if (input.isKeyHeld(SDL_SCANCODE_S)) moveDirection -= forward;
         if (input.isKeyHeld(SDL_SCANCODE_D)) moveDirection += side;
         if (input.isKeyHeld(SDL_SCANCODE_A)) moveDirection -= side;
-        moveDirection = glm::normalize(moveDirection);
+        if (input.isKeyHeld(SDL_SCANCODE_Q)) moveDirection += up;
+        if (input.isKeyHeld(SDL_SCANCODE_E)) moveDirection -= up;
+        if (glm::length(moveDirection) >= 0.05f)
+        {
+            moveDirection = glm::normalize(moveDirection);
+        }
 
-        position += moveDirection * speedScalar;
+        position += moveDirection * speed * dT;
         
-
-        
-
         //lookAt = glm::rotate(-yaw, glm::vec3(0, 1, 0)) * glm::rotate(-pitch, glm::vec3(1, 0, 0));
         //forward = lookAt * glm::vec4(forward, 1.f);
         //side = glm::normalize(glm::cross(up, forward));
         //up = glm::normalize(glm::cross(forward, up));
-
-        
 
         //our movement is already handled by subscribing to the listeners when we created the camera
         //position += moveDirection;

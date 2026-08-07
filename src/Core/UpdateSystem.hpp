@@ -1,9 +1,10 @@
 #pragma once
 #include <vector>
-#include "IUpdate.hpp"
+
 
 namespace EngineCore
 {
+    class IUpdate;
     class UpdateSystem
     {
     public: 

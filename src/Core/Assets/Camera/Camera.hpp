@@ -1,19 +1,20 @@
 #pragma once
 
 #include <glm/glm.hpp>
-
+#include "Core/IUpdate.hpp"
 
 namespace EngineCore
 {
     enum class ProjectionType { Orthographic = 0, Perspective = 1};
 
-    class Camera
+    class aCamera : public IUpdate
     {
     public:
         
-        Camera() = default;
-        Camera(const glm::mat4& p) : projection(p) {}
-        virtual ~Camera() = default;
+        aCamera() = default;
+        aCamera(const glm::mat4& p) : projection(p) {}
+        virtual ~aCamera() = default;
+        void onUpdate(float deltaTime) override;
 
         const glm::mat4& getProjection() const { return projection; }
     private:

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.23)
 
 project(GameEngine)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
@@ -32,17 +32,27 @@ file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Common/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/*/*.cpp
+
+
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logging/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Platform/*/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Threading/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Window/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/IO/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/OpenGL/*/*.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/*/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/Buffers/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/OpenGL/Render/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/OpenGL/Render/Render3d/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/OpenGL/*/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/Render/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/Shader/*.cpp
+
+
+
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Assets/Camera/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Asset/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Asset/Mesh/*.cpp
 
     
 )
@@ -61,11 +71,13 @@ include_directories(
     "${CMAKE_SOURCE_DIR}/src/App"
     "${CMAKE_SOURCE_DIR}/src/Errors"
     "${CMAKE_SOURCE_DIR}/src/Core/Assets/Camera"
+    "${CMAKE_SOURCE_DIR}/src/nanotime"
     
 )
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/3rdParty/spdlog")
 add_subdirectory("${CMAKE_SOURCE_DIR}/3rdParty/GL")
+
 
 
 add_executable(Engine ${ENGINE_SOURCES})

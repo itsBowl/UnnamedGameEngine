@@ -1,19 +1,21 @@
-#include "Shader.hpp"
+#include "OpenGLShader.hpp"
+#include "PCH.hpp"
 #include "FileManagement.hpp"
 #include "Errors.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace EngineCore
 {
-    static const std::string LOGGER_TAG = "SHADER";
+    static const std::string LOGGER_TAG = "OpenGLShader";
 
-    Shader::Shader(const std::string& fp)
+    OpenGLShader::OpenGLShader(const std::string& fp)
     {
         name = fp.substr(fp.find_last_of('/') + 1);
         namespace FM = FileManagement;
         std::vector<std::pair<std::string, std::string>> fps;
         if (!FM::getFilesInFolder(&fps, fp))
         {
-            logError(LOGGER_TAG, "Failed to load shader from: ", fp);
+            Log::error(LOGGER_TAG, "Failed to load shader from: ", fp);
             return;
         }
         
@@ -30,45 +32,49 @@ namespace EngineCore
         int ret = load(vert, frag);
         if (ret != ShaderErrors::SHADER_OK)
         {
-            logError(LOGGER_TAG, "Shader error in loading");
+            Log::error(LOGGER_TAG, "OpenGLShader error in loading");
         }
     }
 
-    void Shader::setInt(const std::string& name, int v) const
+    ShaderErrors OpenGLShader::getError() const { return error; }
+
+    const std::string& OpenGLShader::getName() const { return name;}
+
+    void OpenGLShader::setInt(const std::string& name, int v) const
     {
         glUniform1i(glGetUniformLocation(id, name.c_str()), (GLint)v);
     }
-    void Shader::setFloat(const std::string& name, float v) const
+    void OpenGLShader::setFloat(const std::string& name, float v) const
     {
         glUniform1f(glGetUniformLocation(id, name.c_str()), GLfloat(v));
     }
-    void Shader::setVec2(const std::string& name, glm::vec2 v) const
+    void OpenGLShader::setVec2(const std::string& name, glm::vec2 v) const
     {
         glUniform2fv(glGetUniformLocation(id, name.c_str()), 1, glm::value_ptr(v));
     }
-    void Shader::setVec4(const std::string& name, glm::vec4 v) const
+    void OpenGLShader::setVec4(const std::string& name, glm::vec4 v) const
     {
         glUniform4fv(glGetUniformLocation(id, name.c_str()), 1, glm::value_ptr(v));
     }
-    void Shader::setMat4(const std::string& name, glm::mat4 v) const
+    void OpenGLShader::setMat4(const std::string& name, glm::mat4 v) const
     {
         glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, glm::value_ptr(v));
     }
 
     
 
-    void Shader::bind() const
+    void OpenGLShader::bind() const
     {
         glUseProgram(id);
     }
 
-    void Shader::unbind() const
+    void OpenGLShader::unbind() const
     {
         //program 0 is no shader, therefor counts as an unbind call
         glUseProgram(0);
     }
 
-    int Shader::load(const std::string& vp, const std::string& fp)
+    int OpenGLShader::load(const std::string& vp, const std::string& fp)
     {
         id = glCreateProgram();
 
@@ -81,14 +87,19 @@ namespace EngineCore
         vc.push_back('\0');
         fc.push_back('\0');
         auto vs = compileStage(vc, GL_VERTEX_SHADER);
-        if (shaderErrorCode != ShaderErrors::SHADER_OK)
+        if (error != ShaderErrors::SHADER_OK)
         {
-            logError(LOGGER_TAG, "vertex shader failed");
+            Log::error(LOGGER_TAG, "vertex shader failed");
+            glDeleteShader(vs);
+            return error;
         }
         auto fs = compileStage(fc, GL_FRAGMENT_SHADER);
-        if (shaderErrorCode != ShaderErrors::SHADER_OK)
+        if (error != ShaderErrors::SHADER_OK)
         {
-            logError(LOGGER_TAG, "fragment shader failed");
+            Log::error(LOGGER_TAG, "fragment shader failed");
+            glDeleteShader(vs);
+            glDeleteShader(fs);
+            return error;
         }
 
 
@@ -97,10 +108,11 @@ namespace EngineCore
         glAttachShader(id, fs);
         glLinkProgram(id);
 
-        shaderErrorCode = checkShaderCompileStatus(id);
-        if (shaderErrorCode != ShaderErrors::SHADER_OK)
+        error = checkShaderCompileStatus(id);
+        if (error != ShaderErrors::SHADER_OK)
         {
-            logError(LOGGER_TAG, "Link Failed");
+            Log::error(LOGGER_TAG, "Link Failed");
+            return error;
         }
         glDeleteShader(vs);
         glDeleteShader(fs);
@@ -108,18 +120,22 @@ namespace EngineCore
         return ShaderErrors::SHADER_OK;
     }
 
-    GLuint Shader::compileStage(const std::vector<char>& src, GLenum type)
+    GLuint OpenGLShader::compileStage(const std::vector<char>& src, GLenum type)
     {
         GLuint shader = glCreateShader(type);
         const char* srcPtr = src.data();
         glShaderSource(shader, 1, &srcPtr, nullptr);
         glCompileShader(shader);
-        shaderErrorCode = checkShaderCompileStatus(shader);
-        flushLogs();
+        checkShaderCompileStatus(shader);
+        Log::flush();
+        if (error != ShaderErrors::SHADER_OK)
+        {
+            return 0;
+        }
         return shader;
     }
 
-    ShaderErrors Shader::checkShaderCompileStatus(GLuint shader)
+    ShaderErrors OpenGLShader::checkShaderCompileStatus(GLuint shader)
     {
         GLint res = GL_FALSE;
         ShaderType shaderType = getShaderType(shader);
@@ -134,7 +150,7 @@ namespace EngineCore
         {
             glGetProgramiv(shader, GL_LINK_STATUS, &res);
         }
-        logInfo(LOGGER_TAG, "[", magic_enum::enum_name(shaderType), "] for program [", id, "] compile result: ", res);
+        Log::info(LOGGER_TAG, "[", magic_enum::enum_name(shaderType), "] for program [", id, "] compile result: ", res);
         if (res == GL_FALSE)
         {
             if (shaderType != ShaderType::SHADER_TYPE_PROGRAM)
@@ -147,23 +163,28 @@ namespace EngineCore
                 std::string src((srcLen > 1) ? srcLen : 1, '\0');
                 glGetShaderSource(shader, srcLen, NULL, src.data());
 
-                logError(LOGGER_TAG, "\n", src, "\nError compiling shader!\n\n", error);
+                Log::error(LOGGER_TAG, "\n", src, "\nError compiling shader!\n\n", error);
                 return ShaderErrors::SHADER_FAILED_COMPILE;
             }
             else
             {
+                if (!glIsProgram(shader))
+                {
+                    Log::error(LOGGER_TAG, "PROGARM CECK ON NON PROGRAM");
+                }
                 glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &logLen);
+                Log::error(LOGGER_TAG, "Log Length: ", logLen);
                 std::string error((logLen > 1 ) ? logLen : 1, '\0');
                 glGetProgramInfoLog(shader, logLen, NULL, error.data());
-                logError(LOGGER_TAG, "Error linking program!\n\n", error);
+                Log::error(LOGGER_TAG, "Error linking program!\n\n", error);
                 return ShaderErrors::SHADER_FAILED_LINK;
             }
         }
-
+        Log::info(LOGGER_TAG, "Shader state compliled correctly!");
         return ShaderErrors::SHADER_OK;
     }
 
-    Shader::ShaderType Shader::getShaderType(GLuint shader)
+    OpenGLShader::ShaderType OpenGLShader::getShaderType(GLuint shader)
     {
         if (glIsProgram(shader))
             return ShaderType::SHADER_TYPE_PROGRAM;
@@ -175,7 +196,7 @@ namespace EngineCore
             return static_cast<ShaderType>(type);
         }
 
-        logError(LOGGER_TAG, "getShaderType called with invalid id=", shader);
+        Log::error(LOGGER_TAG, "getShaderType called with invalid id=", shader);
         return ShaderType::SHADER_TYPE_NONE;
     }
 }

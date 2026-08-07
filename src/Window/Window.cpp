@@ -10,7 +10,7 @@ namespace EngineCore
     static const std::string LOGGER_TAG = "Window";
     int Window::init()
     {
-        logInfo(LOGGER_TAG, "Initialising SDL");
+        Log::info(LOGGER_TAG, "Initialising SDL");
         if (!SDL_Init(SDL_INIT_VIDEO))
             return CoreErrors::SDL_INIT_FAIL;
 
@@ -25,12 +25,12 @@ namespace EngineCore
 
         if (SDL_GL_CreateContext(window) == NULL)
         {
-            logFatal(LOGGER_TAG, SDL_GetError());
+            Log::fatal(LOGGER_TAG, SDL_GetError());
             return CoreErrors::SDL_FAILED_TO_CREATE_CONTEXT;
         }
 
         
-        flushLogs();
+        Log::flush();
         if (initGraphics() != GraphicsErrors::GRAPHICS_OK)
         {
             return CoreErrors::GRAPHICS_FAILED_TO_INIT;

@@ -8,9 +8,9 @@ namespace EngineCore::FileManagement
 		if (loc == nullptr || folder == "") return false;
 		std::filesystem::directory_iterator fsIt = std::filesystem::directory_iterator(folder);
 
-		for (const auto& entry : std::filesystem::directory_iterator(fsIt))
+		for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(fsIt))
 		{
-			auto path = entry.path().string();
+			std::string path = entry.path().string();
 			loc->push_back(path);
 		}
 		return true;
@@ -21,10 +21,10 @@ namespace EngineCore::FileManagement
 		if (loc == nullptr || folder == "") return false;
 		std::filesystem::directory_iterator fsIt = std::filesystem::directory_iterator(folder);
 
-		for (const auto& entry : std::filesystem::directory_iterator(fsIt))
+		for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(fsIt))
 		{
-			auto path = entry.path().string();
-			auto extention = entry.path().extension().string();
+			std::string path = entry.path().string();
+			std::string extention = entry.path().extension().string();
 			loc->push_back(std::make_pair(path, extention));
 		}
 		return true;
@@ -34,7 +34,7 @@ namespace EngineCore::FileManagement
 	{
 		std::vector<std::pair<std::string, std::string>> files;
 		getFilesInFolder(&files, path);
-		for (auto& i : files)
+		for (std::pair<std::string, std::string>& i : files)
 		{
 			if (i.first == name)
 			{

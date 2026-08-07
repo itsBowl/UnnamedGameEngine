@@ -18,8 +18,8 @@ namespace EngineCore
     {
     public:
         
-        Camera(InputHandler&, UpdateSystem&, Window&);
-        void onUpdate();
+        Camera(InputHandler&, Window&);
+        void onUpdate(float dT) override;
         void updateUBO();
         
 
@@ -36,14 +36,14 @@ namespace EngineCore
         glm::mat4 projection;
         glm::mat4 view;
 
-        GLuint ubo;
+        GLuint ubo = 0;
 
         struct UBO
         {
-            glm::mat4 view      = glm::mat4(1);
-            glm::mat4 proj      = glm::mat4(1);
-            glm::mat4 viewProj  = glm::mat4(1);
-            glm::vec4 pos       = glm::vec4(1);
+            alignas(16)glm::mat4 view      = glm::mat4(1);
+            alignas(16)glm::mat4 proj      = glm::mat4(1);
+            alignas(16)glm::mat4 viewProj  = glm::mat4(1);
+            alignas(16)glm::vec4 pos       = glm::vec4(1);
         } uboData;
         
         glm::vec3 position = glm::vec3(0, 0, 0);
@@ -53,17 +53,19 @@ namespace EngineCore
         glm::vec3 side;
         glm::vec3 up;
 
-        float yaw;
-        float pitch;
+        float yaw = 0.f;
+        float pitch = 0.f;
         
         float fov = 60.f;
         float sensitivity = 0.05f;
+        bool rotate = false;
 
         InputHandler& input;
         Window& window;
 
         InputListener mouseMoveEvent;
         InputListener mouseClickEvent;
+        InputListener mouseReleaseEvent;
         InputListener keyPressEvent;
         InputListener keyReleaseEvent;
 

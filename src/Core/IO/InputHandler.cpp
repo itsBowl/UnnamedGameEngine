@@ -111,7 +111,7 @@ namespace EngineCore
         if (mouseMoved.remove(id)) return;
         if (mouseScroll.remove(id)) return;
 
-        logWarn(LOGGER_TAG, "attempted to remove a listener with an unknown id: ", id);
+        Log::warn(LOGGER_TAG, "attempted to remove a listener with an unknown id: ", id);
     }
 
     bool InputHandler::isKeyHeld(SDL_Scancode sc) const

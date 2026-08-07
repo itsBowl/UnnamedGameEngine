@@ -1,16 +1,16 @@
 #include "IUpdate.hpp"
+#include "Locator.hpp"
 #include "UpdateSystem.hpp"
 
 namespace EngineCore
 {
-    IUpdate::IUpdate(UpdateSystem& us)
-    : system(us)
+    IUpdate::IUpdate()
     {
-        system.registerUpdate(this);
+        Locator::getUpdateSystem().registerUpdate(this);
     }
 
     IUpdate::~IUpdate()
     {
-        system.deregister(this);
+        Locator::getUpdateSystem().deregister(this);
     }
 }

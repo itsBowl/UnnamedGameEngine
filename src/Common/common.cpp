@@ -8,6 +8,7 @@
 
 namespace EngineCore
 {
+    /*
     void string_replace(std::string& str, const char from, const char to)
     {
         for (char& idx : str)
@@ -116,4 +117,5 @@ namespace EngineCore
     {
         return std::string(1, c);
     }
+    */
 }
