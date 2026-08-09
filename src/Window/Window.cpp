@@ -2,15 +2,15 @@
 #include "Window.hpp"
 #include "../Errors/Errors.hpp"
 #include "../Events/Events.hpp"
-#include "../Graphics/OpenGLContext.hpp"
+#include "../Graphics/OpenGL/OpenGLContext.hpp"
 #include <tracy/Tracy.hpp>
 
 namespace EngineCore
 {
-    const std::string LOGGER_TAG = "Window";
+    static const std::string LOGGER_TAG = "Window";
     int Window::init()
     {
-        logInfo(LOGGER_TAG, "Initialising SDL");
+        Log::info(LOGGER_TAG, "Initialising SDL");
         if (!SDL_Init(SDL_INIT_VIDEO))
             return CoreErrors::SDL_INIT_FAIL;
 
@@ -20,17 +20,18 @@ namespace EngineCore
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetSwapInterval(0);
 
         if (SDL_GL_CreateContext(window) == NULL)
         {
-            logFatal(LOGGER_TAG, SDL_GetError());
+            Log::fatal(LOGGER_TAG, SDL_GetError());
             return CoreErrors::SDL_FAILED_TO_CREATE_CONTEXT;
         }
 
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetSwapInterval(0);
-        flushLogs();
-        if (!initGraphics())
+        
+        Log::flush();
+        if (initGraphics() != GraphicsErrors::GRAPHICS_OK)
         {
             return CoreErrors::GRAPHICS_FAILED_TO_INIT;
         }
@@ -44,6 +45,11 @@ namespace EngineCore
         return context->init();
     }
 
+    void Window::swapBuffers()
+    {
+        context->swapBuffers();
+    }
+
     int Window::update()
     {
         ZoneScoped;
@@ -54,5 +60,6 @@ namespace EngineCore
                 return CoreEvents::QUIT;
         }
         context->swapBuffers();
+        return CoreEvents::NONE;
     }
 }

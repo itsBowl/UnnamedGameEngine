@@ -11,6 +11,22 @@ enum CoreErrors
 enum GraphicsErrors
 {
     GRAPHICS_OK = 0,
-    GRAPHICS_GL3W_FAILED_TO_INIT
+    GRAPHICS_GL3W_FAILED_TO_INIT,
 
+};
+
+enum ShaderErrors
+{
+    SHADER_OK = 0,
+    SHADER_FAILED_READ_VS,
+    SHADER_FAILED_READ_FS,
+    SHADER_FAILED_COMPILE,
+    SHADER_FAILED_LINK,
+    SHADER_LIB_FAILED_LOAD,
+};
+
+enum TextureErrors
+{
+    TEXTURE_OK = 0,
+    TEXTURE_FAILED_TO_LOAD,
 };

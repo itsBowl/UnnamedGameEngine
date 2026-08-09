@@ -1,0 +1,17 @@
+#pragma once
+#include "Common/sized_numerics.hpp"
+
+namespace EngineCore
+{
+    ///Get a numerical ID for the calling thread. Thread IDs are assigned on demand and increment with each known thread.
+    u32 thread_id();
+
+    ///Highly precise sleep that minimizes CPU overhead, using a combination of system level accurate sleeping and spinlock.
+    void sleep_nanos(const u64 nanoseconds);
+
+    ///Highly precise sleep that minimizes CPU overhead, using a combination of system level accurate sleeping and spinlock.
+    void sleep_micros(const u64 microseconds);
+
+    ///Highly precise sleep that minimizes CPU overhead, using a combination of system level accurate sleeping and spinlock.
+    void sleep_accurate(const f32 seconds);
+}

@@ -1,79 +1,76 @@
 #pragma once
-#include <sstream>
-#include <string>
-#include "../Common/common.hpp"
-#include "../Common/sized_numerics.hpp"
-#include "glm/glm.hpp"
+#include <mutex>
+#include <unordered_map>
 
+#include "string.hpp"
+#include "Common/sized_numerics.hpp"
 
-#define MAKE_PRINTABLE(type, func) inline std::ostream& operator << (std::ostream& lhs, const type& rhs) { \
-    lhs << func; \
-    return lhs; }
-
-MAKE_PRINTABLE(glm::vec2, '[' << rhs.x << ", " << rhs.y << ']');
-MAKE_PRINTABLE(glm::ivec2, '[' << rhs.x << ", " << rhs.y << ']');
-MAKE_PRINTABLE(glm::dvec2, '[' << rhs.x << ", " << rhs.y << ']');
-MAKE_PRINTABLE(glm::vec3, '[' << rhs.x << ", " << rhs.y << ", " << rhs.z << ']');
-MAKE_PRINTABLE(glm::ivec3, '[' << rhs.x << ", " << rhs.y << ", " << rhs.z << ']');
-MAKE_PRINTABLE(glm::dvec3, '[' << rhs.x << ", " << rhs.y << ", " << rhs.z << ']');
-MAKE_PRINTABLE(glm::vec4, '[' << rhs.x << ", " << rhs.y << ", " << rhs.z << ", " << rhs.w << ']');
-MAKE_PRINTABLE(glm::ivec4, '[' << rhs.x << ", " << rhs.y << ", " << rhs.z << ", " << rhs.w << ']');
-MAKE_PRINTABLE(glm::dvec4, '[' << rhs.x << ", " << rhs.y << ", " << rhs.z << ", " << rhs.w << ']');
-
-#undef MAKE_PRINTABLE
-
-
-
-    enum class LogLevel : uint8_t{
-        NONE = 0,
-        REDUCED,
-        NORMAL,
-        ALL
-    };
-
-    namespace AnsiCodes
+namespace EngineCore
+{
+    ///Fairly simple threadsafe logger with formatting
+    class logger
     {
-        constexpr std::string_view ANSI_RESET = "\u001B[0m";
-        constexpr std::string_view ANSI_BOLD = "\u001B[1m";
-        constexpr std::string_view ANSI_UNDERLINE = "\u001B[4m";
-        constexpr std::string_view ANSI_BLACK = "\u001B[30m";
-        constexpr std::string_view ANSI_RED = "\u001B[31m";
-        constexpr std::string_view ANSI_BRIGHT_RED = "\u001B[91m";
-        constexpr std::string_view ANSI_GREEN = "\u001B[32m";
-        constexpr std::string_view ANSI_BRIGHT_GREEN = "\u001B[92m";
-        constexpr std::string_view ANSI_YELLOW = "\u001B[33m";
-        constexpr std::string_view ANSI_BRIGHT_YELLOW = "\u001B[93m";
-        constexpr std::string_view ANSI_BLUE = "\u001B[34m";
-        constexpr std::string_view ANSI_BRIGHT_BLUE = "\u001B[94m";
-        constexpr std::string_view ANSI_PURPLE = "\u001B[35m";
-        constexpr std::string_view ANSI_BRIGHT_PURPLE = "\u001B[95m";
-        constexpr std::string_view ANSI_CYAN = "\u001B[36m";
-        constexpr std::string_view ANSI_BRIGHT_CYAN = "\u001B[96m";
-        constexpr std::string_view ANSI_GREY = "\u001B[37m";
-        constexpr std::string_view ANSI_WHITE = "\u001B[97m";
-        constexpr std::string_view ANSI_DELETE_LINE = "\u001B[1A\u001B[2K\r";
-    }
+    public:
+        enum class log_level : u8
+        {
+            ALL = 3, //Everything!
+            NORMAL = 2, //No debug
+            REDUCED = 1, //Only warn / error / fatal
+            FATAL_ONLY = 0 //Only fatal
+        };
 
-    void setLogLevel(const LogLevel);
-    void flushLogs();
-    void log(const std::string_view, const std::string_view, const std::string_view, const std::string_view);
+        struct logger_tag
+        {
+            logger_tag(const std::string_view& tag, const std::string_view& format_codes) noexcept : tag_id(tag), message_format_codes(format_codes) {}
 
-    void logDebug(const std::string_view, const std::string_view);
-    void logInfo(const std::string_view, const std::string_view);
-    void logPerf(const std::string_view, const std::string_view);
-    void logWarn(const std::string_view, const std::string_view);
-    void logError(const std::string_view, const std::string_view);
-    void logFatal(const std::string_view, const std::string_view);
-    void logSecret(const std::string_view, const std::string_view);
+            std::string tag_id;
+            std::string message_format_codes;
+        };
 
-    #define VARARG_DEF(type) void type(const std::string_view id, const std::string_view first, const auto... rest) { type(id, EngineCore::stringify(first, rest...)); }
+        ///Destructing the logger automatically flushes any remaining logs.
+        ~logger();
 
-    VARARG_DEF(logDebug)
-    VARARG_DEF(logInfo)
-    VARARG_DEF(logPerf)
-    VARARG_DEF(logWarn)
-    VARARG_DEF(logError)
-    VARARG_DEF(logFatal)
-    VARARG_DEF(logSecret)
+        void set_log_level(const log_level level);
 
-    #undef VARARG_DEF
+        ///Flush buffer logs. A good time to call this is at the end of your update/frame loop.
+        ///Safe to call on a separate thread or through a threadpool task.
+        ///Note that for performance reasons, timestamps are generated at the time of the flush, *not* at the time of the log call.
+        void flush_logs();
+
+        ///Root log function
+        void log_str(const logger_tag& tag, const std::string_view msg, const std::string_view type, const std::string_view formatting);
+
+        //Predefined varients for common use cases:
+
+        void log_debug_str(const logger_tag& tag, const std::string_view msg);
+        void log_info_str(const logger_tag& tag, const std::string_view msg);
+        void log_performance_str(const logger_tag& tag, const std::string_view msg);
+        void log_warn_str(const logger_tag& tag, const std::string_view msg);
+        void log_error_str(const logger_tag& tag, const std::string_view msg);
+        void log_fatal_str(const logger_tag& tag, const std::string_view msg);
+
+        //Templated versions of the predefined functions that performs automatic std::format formatting
+
+        inline void log_debug(const logger_tag tag, const auto... params) { log_debug_str(tag, stringify(params...)); }
+        inline void log_info(const logger_tag tag, const auto... params) { log_info_str(tag, stringify(params...)); }
+        inline void log_performance(const logger_tag tag, const auto... params) { log_performance_str(tag, stringify(params...)); }
+        inline void log_warn(const logger_tag tag, const auto... params) { log_warn_str(tag, stringify(params...)); }
+        inline void log_error(const logger_tag tag, const auto... params) { log_error_str(tag, stringify(params...)); }
+        inline void log_fatal(const logger_tag tag, const auto... params) { log_fatal_str(tag, stringify(params...)); }
+
+    private:
+        void write_tag(std::string_view format, std::string_view color_code, const logger_tag& tag);
+
+        std::mutex logging_lock;
+    #ifdef DEBUG
+        log_level logging_level = log_level::ALL;
+    #else
+        log_level logging_level = log_level::NORMAL;
+    #endif
+
+        std::stringstream builder;
+        std::vector<std::string> message_queue;
+        std::unordered_map<u64, u64> message_repeat_map;
+        u64 last_message_hash = 0;
+    };
+}

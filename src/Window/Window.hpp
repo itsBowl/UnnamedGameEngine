@@ -18,6 +18,7 @@ namespace EngineCore
         int initGraphics();
 
         SDL_Window* getWindow() {return window;}
+        void swapBuffers();
         
         int update();
         

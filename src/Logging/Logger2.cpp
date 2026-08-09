@@ -1,172 +1,119 @@
-#include "PCH.hpp"
-#include "logger2.hpp"
+#include "Logger2.hpp"
 
 #include <chrono>
-#include <ctime>
 #include <iomanip>
 #include <iostream>
 #include <mutex>
 #include <tracy/Tracy.hpp>
 
-#include "../Threading/threading.hpp"
-#include "../Common/common.hpp"
+#include "string.hpp"
+#include "Threading/async.hpp"
 
-
-
-    class LoggingFlushTask final : public EngineCore::ThreadpoolTask
+namespace EngineCore
+{
+    logger::~logger()
     {
-        public:
-        std::vector<std::string> data;
-
-        void execute() override
-        {
-            ZoneScopedN("Flush logs task");
-            constexpr std::string_view timeFormat = std::string_view("\u001B[36m\u001B[1m");
-            const std::time_t currentTime = std::time(nullptr);
-
-            const auto& now = std::localtime(&currentTime);
-
-            const std::string timeStamp = EngineCore::stringify('[', timeFormat, now->tm_hour, ":", now->tm_min, ":", now->tm_sec, AnsiCodes::ANSI_RESET, "]");
-            
-            for (const std::string& msg : data)
-            {
-                if (msg != AnsiCodes::ANSI_DELETE_LINE) std::cout << timeStamp;
-                std::cout << msg;
-            }
-        
-        }
-    };
-
-    static std::mutex loggingLock;
-    static LogLevel loggingLevel = LogLevel::NORMAL;
-    static int32_t logRepeatCount = 0;
-    static std::string lastMsg;
-    static std::string lastTag;
-    static std::stringstream builder;
-    static std::vector<std::string> messageQueue;
-    static bool hasBufferedMsgs = false;
-
-    static LoggingFlushTask* currentFlushTask = nullptr;
-
-    void setLogLevel(const LogLevel l)
-    {
-        loggingLock.lock();
-        loggingLevel = l;
-        loggingLock.unlock();
+        flush_logs();
     }
 
-    void flushLogs()
+    void logger::set_log_level(const log_level level)
+    {
+        logging_lock.lock();
+        logging_level = level;
+        logging_lock.unlock();
+    }
+
+    void logger::flush_logs()
     {
         ZoneScoped;
-        loggingLock.lock();
+        logging_lock.lock();
 
-        if (!hasBufferedMsgs)
+        if (message_queue.empty())
         {
-            loggingLock.unlock();
+            logging_lock.unlock();
             return;
         }
 
-        if (currentFlushTask != nullptr && !currentFlushTask->completed())
+        //Minimize blocking other threads logging messages
+        const std::vector messages = std::move(message_queue);
+        message_queue = std::vector<std::string>();
+        logging_lock.unlock();
+
+        const auto local_time = std::chrono::zoned_time{std::chrono::current_zone(), std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now())};
+        const std::string time_str = std::format("{0:%T}", local_time);
+        const std::string timestamp = stringify(ansi_formatting::reset, '[', ansi_formatting::bold, ansi_formatting::cyan, time_str, ansi_formatting::reset, "]");
+
+        for (const std::string& message : messages)
         {
-            loggingLock.unlock();
-            return;
+            const u64 hash = string_hash(message);
+            const bool is_duplicate = hash == last_message_hash;
+            if (is_duplicate) std::cout << ansi_formatting::delete_line;
+            else message_repeat_map[hash] = 1;
+
+            std::cout << timestamp;
+            std::cout << message;
+
+            if (is_duplicate) std::cout << " (" << ansi_formatting::bold << "x" << std::to_string(message_repeat_map[hash]) << ')';
+
+            std::cout << std::endl;
+
+            last_message_hash = hash;
+            message_repeat_map[hash]++;
         }
-
-        delete currentFlushTask;
-        currentFlushTask = nullptr;
-
-        currentFlushTask = new LoggingFlushTask();
-        currentFlushTask->data = messageQueue;
-        currentFlushTask->enqueue();
-
-        messageQueue.clear();
-        hasBufferedMsgs = false;
-
-        loggingLock.unlock();
     }
 
-    inline void writeTag(const std::string_view fmt, const std::string_view colour, const std::string_view tag)
-    {
-        builder << '[' << fmt << colour << tag << AnsiCodes::ANSI_RESET << ']';
-    }
-
-    inline void writeRepeatTag(const std::string_view colour)
-    {
-        builder << AnsiCodes::ANSI_RESET << " [" << AnsiCodes::ANSI_BOLD << colour << "+" << std::to_string(logRepeatCount) << AnsiCodes::ANSI_RESET << ']';
-    }
-
-    void log(const std::string_view tag, const std::string_view msg, const std::string_view type, const std::string_view colour)
+    void logger::log_str(const logger_tag& tag, const std::string_view msg, const std::string_view type, const std::string_view formatting)
     {
         ZoneScoped;
-        
-        loggingLock.lock();
 
-        const bool isRepeat = msg == lastMsg && tag == lastTag;
+        logging_lock.lock();
 
-        if (isRepeat)
-        {
-            logRepeatCount++;
-            messageQueue.emplace_back(AnsiCodes::ANSI_DELETE_LINE);
-        }
-        else
-        {
-            logRepeatCount = 0;
-            lastMsg = msg;
-            lastTag = tag;
-        }
+        builder << stringify("[", ansi_formatting::bold, ansi_formatting::bright_blue, "T", std::setfill('0'), std::setw(3), thread_id(), ansi_formatting::reset, ']');
 
-        builder << EngineCore::stringify("[", AnsiCodes::ANSI_BOLD, AnsiCodes::ANSI_BRIGHT_BLUE, "T", std::setfill('0'), std::setw(3), EngineCore::getCurrentThreadID(), AnsiCodes::ANSI_RESET, ']');
+        if (!type.empty()) write_tag(ansi_formatting::bold, formatting, {type, ""});
+        if (!tag.tag_id.empty()) write_tag(ansi_formatting::reset, ansi_formatting::purple, tag);
 
+        builder << ' ' << formatting << msg;
 
-        if (!type.empty()) writeTag(AnsiCodes::ANSI_BOLD, colour, type);
-        if (!tag.empty()) writeTag(AnsiCodes::ANSI_RESET, AnsiCodes::ANSI_PURPLE, tag);
-
-        builder << ' ' << colour << msg << AnsiCodes::ANSI_RESET;
-
-        if (isRepeat) writeRepeatTag(colour);
-        
-        builder << std::endl;
-
-        messageQueue.push_back(builder.str());
+        message_queue.push_back(builder.str());
         builder.str("");
 
-        hasBufferedMsgs = true;
-
-        loggingLock.unlock();
+        logging_lock.unlock();
     }
 
-    void logDebug(const std::string_view tag, const std::string_view msg)
+    void logger::log_debug_str(const logger_tag& tag, const std::string_view msg)
     {
-        if (loggingLevel > LogLevel::NORMAL) log(tag, msg, "DEBUG", AnsiCodes::ANSI_GREEN);
+        if (logging_level > log_level::NORMAL) log_str(tag, msg, "DEBG", ansi_formatting::lime);
     }
 
-    void logInfo(const std::string_view tag, const std::string_view msg)
+    void logger::log_info_str(const logger_tag& tag, const std::string_view msg)
     {
-        if (loggingLevel > LogLevel::REDUCED) log(tag, msg, "INFO", AnsiCodes::ANSI_BLUE);
+        if (logging_level > log_level::REDUCED) log_str(tag, msg, "INFO", ansi_formatting::azure);
     }
 
-    void logPerf(const std::string_view tag, const std::string_view msg)
+    void logger::log_performance_str(const logger_tag& tag, const std::string_view msg)
     {
-        if (loggingLevel > LogLevel::REDUCED) log(tag, msg, "PERF", AnsiCodes::ANSI_CYAN);
+        if (logging_level > log_level::REDUCED) log_str(tag, msg, "PERF", ansi_formatting::cyan);
     }
 
-    void logWarn(const std::string_view tag, const std::string_view msg)
+    void logger::log_warn_str(const logger_tag& tag, const std::string_view msg)
     {
-        if (loggingLevel > LogLevel::NONE) log(tag, msg, "WARN", AnsiCodes::ANSI_BRIGHT_YELLOW);
+        if (logging_level > log_level::FATAL_ONLY) log_str(tag, msg, "WARN", ansi_formatting::bright_yellow);
     }
 
-    void logError(const std::string_view tag, const std::string_view msg)
+    void logger::log_error_str(const logger_tag& tag, const std::string_view msg)
     {
-        if (loggingLevel > LogLevel::NONE) log(tag, msg, "ERROR", AnsiCodes::ANSI_RED);
+        if (logging_level > log_level::FATAL_ONLY) log_str(tag, msg, "ERRR", ansi_formatting::red);
     }
 
-    void logFatal(const std::string_view tag, const std::string_view msg)
+    void logger::log_fatal_str(const logger_tag& tag, const std::string_view msg)
     {
-        constexpr std::string_view fatal = std::string_view("\u001B[91m\u001B[1m\u001B[4m");
-        log(tag, msg, "FATAL", fatal);
+        static const std::string fatal_format = stringify(ansi_formatting::bright_red, ansi_formatting::bold, ansi_formatting::underline);
+        log_str(tag, msg, "FATAL", fatal_format);
     }
 
-    void logSecret(const std::string_view tag, const std::string_view msg)
+    inline void logger::write_tag(const std::string_view format, const std::string_view color_code, const logger_tag& tag)
     {
-        log(tag, msg, "SECRET", AnsiCodes::ANSI_BRIGHT_YELLOW);
+        builder << '[' << format << color_code << tag.tag_id << ansi_formatting::reset << ']' << tag.message_format_codes;
     }
+}
