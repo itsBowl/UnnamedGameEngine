@@ -1,3 +1,5 @@
+!Assets/**
+
 # Prerequisites
 *.d
 
@@ -35,3 +37,4 @@
 
 build/**
 out/**
+3rdParty/assimp/bin/**

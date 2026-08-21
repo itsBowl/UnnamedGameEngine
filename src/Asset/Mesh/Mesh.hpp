@@ -3,15 +3,11 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include "Buffers/IVertexArray.hpp"
+#include "Asset/Vertex.hpp"
 
 namespace EngineCore
 {
-    struct Vertex
-    {
-        alignas(4)glm::vec3 position;
-        alignas(4)glm::vec3 normal;
-        alignas(4)glm::vec2 uv;
-    };
+
 
     class Mesh
     {

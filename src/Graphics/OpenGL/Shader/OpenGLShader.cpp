@@ -42,23 +42,23 @@ namespace EngineCore
 
     void OpenGLShader::setInt(const std::string& name, int v) const
     {
-        glUniform1i(glGetUniformLocation(id, name.c_str()), (GLint)v);
+        glProgramUniform1i(id, glGetUniformLocation(id, name.c_str()), (GLint)v);
     }
     void OpenGLShader::setFloat(const std::string& name, float v) const
     {
-        glUniform1f(glGetUniformLocation(id, name.c_str()), GLfloat(v));
+        glProgramUniform1f(id, glGetUniformLocation(id, name.c_str()), GLfloat(v));
     }
     void OpenGLShader::setVec2(const std::string& name, glm::vec2 v) const
     {
-        glUniform2fv(glGetUniformLocation(id, name.c_str()), 1, glm::value_ptr(v));
+        glProgramUniform2fv(id, glGetUniformLocation(id, name.c_str()), 1, glm::value_ptr(v));
     }
     void OpenGLShader::setVec4(const std::string& name, glm::vec4 v) const
     {
-        glUniform4fv(glGetUniformLocation(id, name.c_str()), 1, glm::value_ptr(v));
+        glProgramUniform4fv(id, glGetUniformLocation(id, name.c_str()), 1, glm::value_ptr(v));
     }
     void OpenGLShader::setMat4(const std::string& name, glm::mat4 v) const
     {
-        glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, glm::value_ptr(v));
+        glProgramUniformMatrix4fv(id, glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, glm::value_ptr(v));
     }
 
     

@@ -4,8 +4,6 @@
 #include "glm/glm.hpp"
 #include "IShader.hpp"
 
-typedef unsigned int GLenum;
-
 namespace EngineCore
 {
     class ShaderLibrary

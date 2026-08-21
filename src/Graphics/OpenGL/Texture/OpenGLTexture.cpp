@@ -1,13 +1,19 @@
-#include "Texture2d.hpp"
-#include "Logger2.hpp"
+#include "OpenGLTexture.hpp"
+#include "Log.hpp"
 #include "Errors.hpp"
 #include <stb_image/stb_image.h>
 
 namespace EngineCore
 {
-    static const std::string LOGGER_TAG = "Texture";
+    static const std::string LOGGER_TAG = "OpenGLTexture";
 
-    int Texture2d::load(const std::string& path)
+    OpenGLTexture::OpenGLTexture(const std::string& fp)
+    {
+        name = fp.substr(fp.find_last_of('/') + 1);
+        load(fp);
+    }
+
+    int OpenGLTexture::load(const std::string& path)
     {
         stbi_set_flip_vertically_on_load(true); //openGL requirement
 
@@ -50,24 +56,30 @@ namespace EngineCore
         return TextureErrors::TEXTURE_OK;
     }
 
-    void Texture2d::bind(uint32_t slot) const
+    void OpenGLTexture::bind(uint32_t slot) const
     {
         glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_2D, id);
     }
 
-    void Texture2d::unbind() const
+    void OpenGLTexture::unbind()
     {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    void Texture2d::destory()
+    void OpenGLTexture::destory()
     {
         if (exists())
         {
+            unbind();
             Log::info(LOGGER_TAG, "Destorying texture: ", id);
             glDeleteTextures(1, &id);
             id = 0;
         }
+    }
+
+    const std::string& OpenGLTexture::getName() const
+    {
+        return name;
     }
 }

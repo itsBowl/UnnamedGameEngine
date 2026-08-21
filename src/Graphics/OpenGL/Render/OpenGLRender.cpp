@@ -2,10 +2,18 @@
 #include "Logger2.hpp"
 #include <GL/gl3w.h>
 #include "Asset/Mesh/Mesh.hpp"
+#include "Graphics/Shader/IShader.hpp"
 
 namespace EngineCore
 {
     static const std::string LOGGER_TAG = "OpenGLRender";
+
+
+    OpenGLRender::~OpenGLRender()
+    {
+        Log::info("OpenGLRender destoryed");
+        Log::flush();
+    }
 
     void OpenGLRender::init()
     {
@@ -17,6 +25,9 @@ namespace EngineCore
         glFrontFace(GL_CCW);
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        stats.drawCalls = 0;
+        stats.indexCount = 0;
         
 
         Log::flush();
@@ -50,21 +61,27 @@ namespace EngineCore
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    void OpenGLRender::draw(Mesh& m)
+    void OpenGLRender::draw(Mesh& m, std::shared_ptr<IShader> shader)
     {
-        draw(m.getVAO());
+        draw(m.getVAO(), shader);
     }
 
-    void OpenGLRender::draw(std::shared_ptr<IVertexArray> vao, uint32_t indexCount)
+    void OpenGLRender::draw(std::shared_ptr<IVertexArray> vao, std::shared_ptr<IShader> shader, uint32_t indexCount)
     {
+        shader->bind();
         vao->bind();
 
         uint32_t count = (indexCount == 0) ? vao->getIndexCount() : indexCount;
-
+        
         glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 
-        stats.drawCalls++;
+        ++stats.drawCalls;
         stats.indexCount += count;
+    }
+
+    void OpenGLRender::draw(std::shared_ptr<Mesh> m, std::shared_ptr<IShader> shader)
+    {
+        draw(m->getVAO(), shader);
     }
 
     void OpenGLRender::drawArrays(std::shared_ptr<IVertexArray> vao, uint32_t vertexCount)
@@ -79,18 +96,18 @@ namespace EngineCore
         glViewport(x, y, w, h);
     }
 
-    void OpenGLRender::setDepthTest(bool enabled)
+    void OpenGLRender::setPipelineState(const PipelineState& p)
     {
-        enabled ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+        if (p == pipelineState)
+            return;
+        pipelineState = p;
+        pipelineState.depthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+        pipelineState.blending ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
+        glPolygonMode(GL_FRONT_AND_BACK, pipelineState.wireframe ? GL_LINE : GL_FILL);
     }
 
-    void OpenGLRender::setBlending(bool enabled)
+    const PipelineState& OpenGLRender::getPipelineState() const
     {
-        enabled ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
-    }
-
-    void OpenGLRender::setWireframe(bool enabled)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, enabled ? GL_LINE : GL_FILL);
+        return pipelineState;
     }
 }

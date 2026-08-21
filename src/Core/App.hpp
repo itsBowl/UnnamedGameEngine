@@ -12,7 +12,7 @@
 #include "Time.hpp"
 #include "Graphics/Camera/Camera.hpp"
 
-#include "Asset/Mesh/Mesh.hpp"
+#include "Asset/AssetManager.hpp"
 
 int main(int argc, char** argv);
 
@@ -37,8 +37,8 @@ namespace EngineCore
         InputHandler inputHandler;
         UpdateSystem updateSystem;
         std::unique_ptr<IRender> render;
-        Mesh triangleMesh;
-        ShaderLibrary shaderLib;
+        Mesh squareMesh;
+        AssetManager assetManager;
         bool running = false;
 
         friend int ::main(int argc, char** argv);

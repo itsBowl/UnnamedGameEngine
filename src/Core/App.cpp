@@ -1,6 +1,5 @@
 #include "App.hpp"
 #include "Core/Locator.hpp"
-#include "../Graphics/OpenGL/OpenGLContext.hpp"
 #include <tracy/Tracy.hpp>
 #include "GraphicsFactory.hpp"
 #include "Logging/Log.hpp"
@@ -20,6 +19,7 @@ namespace EngineCore
         render = GraphicsFactory::createRender();
         Locator::provide(render.get());
         Locator::provide(&time);
+        Locator::provide(&assetManager);
         int errValue = window.init();
         if (errValue != CoreErrors::CORE_OK)
         {
@@ -30,10 +30,11 @@ namespace EngineCore
 
         inputHandler.init();
         render->init();
+        PipelineState beginState;
         render->setClearColour(glm::vec4(0.2f, .02f, 0.2f, 1.f));
-        render->setDepthTest(true);
+        render->setPipelineState(beginState);
         running = true;
-        auto ret = shaderLib.load("../Assets/Shaders/Basic");
+        auto ret = assetManager.shader().load("../Assets/Shaders/Basic");
         if (ret == nullptr)
         {
             Log::error(Log::Core, "Basic Shader Failed");
@@ -66,23 +67,74 @@ namespace EngineCore
         }
         Camera camera(inputHandler, window);
 
-        //test tri setup
-        std::vector<Vertex> vertices = {
-        { {-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f} },
-        { { 0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f} },
-        { { 0.0f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f} },
-        };
-        std::vector<uint32_t> indices = { 0, 1, 2 };
-        triangleMesh.create(vertices, indices);
+        std::vector<std::shared_ptr<Mesh>> testModel = assetManager.mesh().load("../Assets/Models/TestRevoker/model.fbx");
+        Log::info(Log::Core, "Model VAO: ", testModel.at(0)->getVAO(), " Model IdxCount: ", testModel.at(0)->getIndexCount());
 
-        shaderLib.debugPrintShaders();
+        //test cube
+        std::vector<Vertex> vertices = 
+        {
+            // Front face (+Z)
+            { {-1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f} },
+            { { 1.0f, -1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f} },
+            { { 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f} },
+            { {-1.0f,  1.0f,  1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f} },
+
+            // Back face (-Z)
+            { { 1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f} },
+            { {-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f} },
+            { {-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f} },
+            { { 1.0f,  1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f} },
+
+            // Left face (-X)
+            { {-1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f} },
+            { {-1.0f, -1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f} },
+            { {-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f} },
+            { {-1.0f,  1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f} },
+
+            // Right face (+X)
+            { { 1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f} },
+            { { 1.0f, -1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f} },
+            { { 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f} },
+            { { 1.0f,  1.0f,  1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f} },
+
+            // Top face (+Y)
+            { {-1.0f,  1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f} },
+            { { 1.0f,  1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f} },
+            { { 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f} },
+            { {-1.0f,  1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f} },
+
+            // Bottom face (-Y)
+            { {-1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f} },
+            { { 1.0f, -1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f} },
+            { { 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f} },
+            { {-1.0f, -1.0f,  1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f} },
+        };
+
+        std::vector<uint32_t> indices = 
+        {
+            // Front
+            0, 1, 2,  2, 3, 0,
+            // Back
+            4, 5, 6,  6, 7, 4,
+            // Left
+            8, 9, 10, 10, 11, 8,
+            // Right
+            12, 13, 14, 14, 15, 12,
+            // Top
+            16, 17, 18, 18, 19, 16,
+            // Bottom
+            20, 21, 22, 22, 23, 20,
+        };
+        //squareMesh.create(vertices, indices);
+
+        assetManager.shader().debugPrintShaders();
         int value = 1;
         InputListener testListener = InputListener(&inputHandler, (EngineCore::ListenerID)inputHandler.onKeyPressed([&value](const KeyEvent& e)
             {
                 if (e.scancode == SDL_SCANCODE_1)
                 {
                     value += 1;
-                    if (value > 3) value = 1;
+                    if (value > 4) value = 1;
                     Log::info(Log::Core, "Updated Value: ", value);
                 }
             }
@@ -113,11 +165,10 @@ namespace EngineCore
             //render loop
             render->beginFrame();
             render->clear();
-            std::shared_ptr<IShader> shader = shaderLib.get("Basic");
-            shader->bind();
-            shader->setInt("test", value);
-            render->draw(triangleMesh);
-            shader->unbind();
+            assetManager.shader().get("Basic")->setInt("test", value);
+            //render->draw(squareMesh);
+            render->draw(testModel.at(0), assetManager.shader().get("Basic"));
+            assetManager.shader().get("Basic")->unbind();
             render->endFrame();
             window.swapBuffers();
             Log::flush();
