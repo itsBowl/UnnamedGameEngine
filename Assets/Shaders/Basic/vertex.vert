@@ -5,7 +5,7 @@ layout(location = 1) in vec3 a_VertexColour;
 
 
 
-layout(std140) uniform uboMatrix
+layout(std140, binding = 0) uniform uboMatrix
 {
     mat4 view;
     mat4 proj;
@@ -13,7 +13,11 @@ layout(std140) uniform uboMatrix
     vec4 pos;
 };
 
-uniform int test;
+layout(std140, binding = 1) uniform uboTest
+{
+    int test;
+};
+
 out vec3 vertexCol;
 void main()
 {

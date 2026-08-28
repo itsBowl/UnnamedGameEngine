@@ -22,8 +22,4 @@ namespace EngineCore
         vao->addIndexBuffer(ibo);
     }
 
-    void Mesh::bind() const
-    {
-        vao->bind();
-    }
 }

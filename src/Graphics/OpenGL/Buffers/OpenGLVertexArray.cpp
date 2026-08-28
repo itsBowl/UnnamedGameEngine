@@ -40,7 +40,7 @@ namespace EngineCore
     void OpenGLVertexArray::addVertexBuffer(std::shared_ptr<IVertexBuffer> vbo, const BufferLayout& layout)
     {
         bind();
-        vbo->bind();
+        static_cast<OpenGLVertexBuffer*>(vbo.get())->bind();
 
         for (const BufferElement& e : layout.getElements())
         {
@@ -75,7 +75,7 @@ namespace EngineCore
     void OpenGLVertexArray::addIndexBuffer(std::shared_ptr<IIndexBuffer> ibo)
     {
         bind();
-        ibo->bind();
+        static_cast<OpenGLIndexBuffer*>(ibo.get())->bind();
         indexBuffer = ibo;
         indexCount = ibo->getCount();
     }

@@ -2,6 +2,7 @@
 #include "IO/InputListener.hpp"
 #include "Camera.hpp"
 #include "Logging/Log.hpp"
+#include "Graphics/GraphicsFactory.hpp"
 
 
 namespace EngineCore
@@ -70,10 +71,7 @@ namespace EngineCore
 
     void Camera::createUBO()
     {
-        glGenBuffers(1, &ubo);
-        glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(UBO), nullptr, GL_DYNAMIC_DRAW);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo);
+        ubo = GraphicsFactory::createUniformBuffer();
     }
 
     void Camera::updateUBO()
@@ -82,9 +80,7 @@ namespace EngineCore
         uboData.proj = projection;
         uboData.pos = glm::vec4(position, 1.0);
 
-        glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UBO), &uboData);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        ubo->setData(&uboData, sizeof(UBO), 0);
     }
 
 

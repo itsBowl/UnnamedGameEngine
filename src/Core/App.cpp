@@ -34,7 +34,7 @@ namespace EngineCore
         render->setClearColour(glm::vec4(0.2f, .02f, 0.2f, 1.f));
         render->setPipelineState(beginState);
         running = true;
-        auto ret = assetManager.shader().load("../Assets/Shaders/Basic");
+        IShader* ret = assetManager.shader().load("../Assets/Shaders/Basic").get();
         if (ret == nullptr)
         {
             Log::error(Log::Core, "Basic Shader Failed");
@@ -139,6 +139,8 @@ namespace EngineCore
                 }
             }
         ));
+        std::shared_ptr<IUniformBuffer> testUBO = GraphicsFactory::createUniformBuffer();
+        testUBO->setData(&value, sizeof(value));
 
 
         while (running)
@@ -162,13 +164,14 @@ namespace EngineCore
 
             updateSystem.updateAll(time.getDeltaTime());
             
+            
             //render loop
             render->beginFrame();
             render->clear();
-            assetManager.shader().get("Basic")->setInt("test", value);
+            testUBO->setData(&value, sizeof(value));
+            //assetManager.shader().get("Basic")->setInt("test", value);
             //render->draw(squareMesh);
-            render->draw(testModel.at(0), assetManager.shader().get("Basic"));
-            assetManager.shader().get("Basic")->unbind();
+            render->draw(testModel.at(0), assetManager.shader().get("Basic"), {camera.getUBO(), testUBO});
             render->endFrame();
             window.swapBuffers();
             Log::flush();

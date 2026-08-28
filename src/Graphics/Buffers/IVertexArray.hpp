@@ -11,9 +11,6 @@ namespace EngineCore
     public:
         virtual ~IVertexArray() = default;
 
-        virtual void bind() const = 0;
-        virtual void unbind() const = 0;
-
         virtual void addVertexBuffer(std::shared_ptr<IVertexBuffer> vbo, const BufferLayout& layout) = 0;
         virtual void addIndexBuffer(std::shared_ptr<IIndexBuffer> ibo) = 0;
 

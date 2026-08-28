@@ -67,10 +67,10 @@ file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS
 
 
 if (WIN32)
-    #file(GLOB DX12_SOURCES CMAKE_CONFIGURE_DEPENDS
-    #    ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/DirectX12/*.cpp
-    #    
-    #)
+    file(GLOB DX12_SOURCES CMAKE_CONFIGURE_DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/DirectX12/*.cpp
+        
+    )
     #list(APPEND ENGINE_SOURCES ${DX12_SOURCES})
 endif()
 

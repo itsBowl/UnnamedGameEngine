@@ -12,8 +12,8 @@ namespace EngineCore
         OpenGLIndexBuffer(const uint32_t* idx, uint32_t count, GLenum usage = GL_STATIC_DRAW);
         ~OpenGLIndexBuffer() override;
         void create(const uint32_t* idx, uint32_t count, GLenum usage = GL_STATIC_DRAW);
-        void bind() const override;
-        void unbind() const override;
+        void bind() const;
+        void unbind() const;
         void destory();
         uint32_t getCount() const override { return count; }
         bool exists() const { return id != 0; }

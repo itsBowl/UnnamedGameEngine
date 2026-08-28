@@ -2,8 +2,10 @@
 in vec3 vertexCol;
 layout(location = 0) out vec4 fragColour;
 
-uniform int test;
-uniform float time;
+layout(std140, binding = 1) uniform uboTest
+{
+    int test;
+};
 
 vec3 col1 = vec3(1.f, 0.f, 0.f);
 vec3 col2 = vec3(0.f, 1.f, 0.f);

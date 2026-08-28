@@ -49,21 +49,22 @@ static void openGLMessageCallback(GLenum source, GLenum type, GLuint id, GLenum 
     {
         case GL_DEBUG_SEVERITY_NOTIFICATION:
             EngineCore::Log::warn("OpenGLNotification", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
-            EngineCore::Log::flush();
+            
             break;
         case GL_DEBUG_SEVERITY_LOW:
             EngineCore::Log::warn("OpenGLLow", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
-            EngineCore::Log::flush();
+            
             break;
 		case GL_DEBUG_SEVERITY_MEDIUM:
             EngineCore::Log::warn("OpenGLMedium", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
-            EngineCore::Log::flush();
+            
             break;
 		case GL_DEBUG_SEVERITY_HIGH:
             EngineCore::Log::warn("OpenGLHigh", EngineCore::stringify(src_str, ", ", type_str, ", ", severity_str, ", 0x", std::hex, id, ": ", message, '\n'));
-            EngineCore::Log::flush();
+            
             break;
     }
+    EngineCore::Log::flush();
 }
 
 namespace EngineCore

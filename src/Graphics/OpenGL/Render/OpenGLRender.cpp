@@ -3,6 +3,9 @@
 #include <GL/gl3w.h>
 #include "Asset/Mesh/Mesh.hpp"
 #include "Graphics/Shader/IShader.hpp"
+#include "OpenGL/Buffers/OpenGLVertexArray.hpp"
+#include "Shader/OpenGLShader.hpp"
+#include "Buffers/OpenGLUniformBuffer.hpp"
 
 namespace EngineCore
 {
@@ -15,7 +18,7 @@ namespace EngineCore
         Log::flush();
     }
 
-    void OpenGLRender::init()
+    void OpenGLRender::init(const WindowHandle& wh)
     {
         Log::info(LOGGER_TAG, "Initialising OpenGLRender");
 
@@ -61,15 +64,21 @@ namespace EngineCore
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    void OpenGLRender::draw(Mesh& m, std::shared_ptr<IShader> shader)
+    void OpenGLRender::draw(Mesh& m, std::shared_ptr<IShader> shader, std::vector<std::shared_ptr<IUniformBuffer>> ubos)
     {
         draw(m.getVAO(), shader);
     }
 
-    void OpenGLRender::draw(std::shared_ptr<IVertexArray> vao, std::shared_ptr<IShader> shader, uint32_t indexCount)
+    void OpenGLRender::draw(std::shared_ptr<IVertexArray> vao, std::shared_ptr<IShader> shader, 
+        const std::vector<std::shared_ptr<IUniformBuffer>> ubos, uint32_t indexCount)
     {
-        shader->bind();
-        vao->bind();
+        static_cast<OpenGLVertexArray*>(vao.get())->bind();
+        static_cast<OpenGLShader*>(shader.get())->bind();
+
+        for (uint32_t i = 0; i < ubos.size(); i++)
+        {
+            static_cast<OpenGLUniformBuffer*>(ubos[i].get())->bindToSlot(i);
+        }
 
         uint32_t count = (indexCount == 0) ? vao->getIndexCount() : indexCount;
         
@@ -79,14 +88,15 @@ namespace EngineCore
         stats.indexCount += count;
     }
 
-    void OpenGLRender::draw(std::shared_ptr<Mesh> m, std::shared_ptr<IShader> shader)
+    void OpenGLRender::draw(std::shared_ptr<Mesh> m, std::shared_ptr<IShader> shader, const std::vector<std::shared_ptr<IUniformBuffer>> ubos)
     {
-        draw(m->getVAO(), shader);
+        draw(m->getVAO(), shader, ubos);
     }
 
-    void OpenGLRender::drawArrays(std::shared_ptr<IVertexArray> vao, uint32_t vertexCount)
+    void OpenGLRender::drawArrays(std::shared_ptr<IVertexArray> vao, uint32_t vertexCount, const std::vector<std::shared_ptr<IUniformBuffer>> ubos)
     {
-        vao->bind();
+        //legacy, needs removal
+        static_cast<OpenGLVertexArray*>(vao.get())->bind();
         glDrawArrays(GL_TRIANGLES, 0, vertexCount);
         stats.drawCalls++;
     }

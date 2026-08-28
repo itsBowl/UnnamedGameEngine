@@ -8,6 +8,7 @@
 #include "Window/Window.hpp"
 #include "gl/gl3w.h"
 #include "Core/IUpdate.hpp"
+#include "Buffers/IUniformBuffer.hpp"
 
 
 namespace EngineCore
@@ -21,6 +22,7 @@ namespace EngineCore
         Camera(InputHandler&, Window&);
         void onUpdate(float dT) override;
         void updateUBO();
+        std::shared_ptr<IUniformBuffer> getUBO() { return ubo; }
         
 
         glm::mat4& getView() {return view;}
@@ -36,7 +38,7 @@ namespace EngineCore
         glm::mat4 projection;
         glm::mat4 view;
 
-        GLuint ubo = 0;
+        std::shared_ptr<IUniformBuffer> ubo;
 
         struct UBO
         {
@@ -71,8 +73,5 @@ namespace EngineCore
 
         glm::vec2 mPos;
         glm::vec3 moveDirection = glm::vec3(0);
-
-        
-
     };
 }

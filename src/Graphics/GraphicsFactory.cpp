@@ -4,6 +4,7 @@
 #include "OpenGL/Buffers/OpenGLVertexArray.hpp"
 #include "OpenGL/Buffers/OpenGLVertexBuffer.hpp"
 #include "OpenGL/Buffers/OpenGLIndexBuffer.hpp"
+#include "OpenGL/Buffers/OpenGLUniformBuffer.hpp"
 #include "OpenGL/Render/OpenGLRender.hpp"
 #include "OpenGL/Shader/OpenGLShader.hpp"
 #include "OpenGL/Texture/OpenGLTexture.hpp"
@@ -86,5 +87,13 @@ namespace EngineCore
             case GraphicsAPI::OpenGL: return std::make_shared<OpenGLIndexBuffer>(indicies, count);
         }
         return nullptr;
+    }
+
+    std::shared_ptr<IUniformBuffer> GraphicsFactory::createUniformBuffer()
+    {
+        switch(getActiveGraphicsAPI())
+        {
+            case GraphicsAPI::OpenGL: return std::make_shared<OpenGLUniformBuffer>();
+        }
     }
 }

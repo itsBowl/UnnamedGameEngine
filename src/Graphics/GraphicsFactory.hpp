@@ -6,6 +6,7 @@
 #include "Render/IRender.hpp"
 #include "Shader/IShader.hpp"
 #include "Texture/ITexture.hpp"
+#include "Buffers/IUniformBuffer.hpp"
 
 namespace EngineCore
 {
@@ -23,5 +24,6 @@ namespace EngineCore
         static std::shared_ptr<IVertexArray> createVertexArray();
         static std::shared_ptr<IVertexBuffer> createVertexBuffer(const void* data, uint32_t size);
         static std::shared_ptr<IIndexBuffer>  createIndexBuffer (const uint32_t* indices, uint32_t count);
+        static std::shared_ptr<IUniformBuffer> createUniformBuffer();
     };
 }

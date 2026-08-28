@@ -51,6 +51,7 @@ namespace EngineCore
         ShaderDataType type;
         uint32_t size;
         uint32_t offset = 0;
+        uint32_t location = 0;
         bool normalised = false;
 
         BufferElement(ShaderDataType t, const std::string& n, bool norm = false):

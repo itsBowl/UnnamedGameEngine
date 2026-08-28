@@ -13,7 +13,6 @@ namespace EngineCore
     {
     public:
         void create(const std::vector<Vertex>& verts, const std::vector<uint32_t>& idx);
-        void bind() const;
         std::shared_ptr<IVertexArray> getVAO() { return vao; }
         uint32_t getIndexCount() const { return vao->getIndexCount();}
 

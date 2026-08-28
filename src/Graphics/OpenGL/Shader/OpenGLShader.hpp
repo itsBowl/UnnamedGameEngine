@@ -12,17 +12,17 @@ public:
     OpenGLShader() = default;
     OpenGLShader(const std::string&);
     //OpenGLShader(const std::string&, const std::string&, const std::string&);
-    int load(const std::string& vp, const std::string& fp) override;
-    void bind() const override;
-    void unbind() const override;
+    int load(const std::string& vp, const std::string& fp);
+    void bind() const;
+    void unbind() const;
     ShaderErrors getError() const override;
     const std::string& getName() const override;
 
-    void setInt(const std::string& name, int v) const override;
-    void setFloat(const std::string& name, float v) const override;
-    void setVec2(const std::string& name, glm::vec2 v) const override;
-    void setVec4(const std::string& name, glm::vec4 v) const override;
-    void setMat4(const std::string& name, glm::mat4 v) const override;
+    void setInt(const std::string& name, int v) const;
+    void setFloat(const std::string& name, float v) const;
+    void setVec2(const std::string& name, glm::vec2 v) const;
+    void setVec4(const std::string& name, glm::vec4 v) const;
+    void setMat4(const std::string& name, glm::mat4 v) const;
 
 private:
     //GL_FRAGMENT_SHADER                0x8B30

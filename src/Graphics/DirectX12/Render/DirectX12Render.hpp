@@ -14,7 +14,7 @@ namespace EngineCore
     class DirectX12Render : public IRender
     {
     public:
-        void init() override;
+        void init(const WindowHandle& w) override;
         void shutdown() override;
         void setWindowProps();
 

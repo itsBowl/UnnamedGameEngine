@@ -23,6 +23,7 @@ enum ShaderErrors
     SHADER_FAILED_COMPILE,
     SHADER_FAILED_LINK,
     SHADER_LIB_FAILED_LOAD,
+    SHADER_FAILED_LOAD,
 };
 
 enum TextureErrors

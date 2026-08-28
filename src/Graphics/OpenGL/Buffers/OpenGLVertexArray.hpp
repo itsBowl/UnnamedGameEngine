@@ -10,8 +10,8 @@ namespace EngineCore
         OpenGLVertexArray();
         ~OpenGLVertexArray() override;
         void create();
-        void bind() const override;
-        void unbind() const override;
+        void bind() const;
+        void unbind() const;
         void destroy();
 
         void addVertexBuffer(std::shared_ptr<IVertexBuffer> vbo, const BufferLayout& layout);
