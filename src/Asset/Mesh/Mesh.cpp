@@ -13,9 +13,9 @@ namespace EngineCore
         ibo = GraphicsFactory::createIndexBuffer(idx.data(), (uint32_t)idx.size());
 
         BufferLayout layout = {
-            {ShaderDataType::Float3, "a_Position"},
-            {ShaderDataType::Float3, "a_Normal"},
-            {ShaderDataType::Float2, "a_TexCoord"},
+            {ShaderDataType::Float3, "POSITION"},
+            {ShaderDataType::Float3, "NORMAL"},
+            {ShaderDataType::Float2, "TEXCOORD"},
         };
 
         vao->addVertexBuffer(vbo, layout);

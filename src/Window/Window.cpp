@@ -1,8 +1,9 @@
 #include "PCH.hpp"
 #include "Window.hpp"
-#include "../Errors/Errors.hpp"
-#include "../Events/Events.hpp"
-#include "../Graphics/OpenGL/OpenGLContext.hpp"
+#include "Errors/Errors.hpp"
+#include "Events/Events.hpp"
+#include "Graphics/OpenGL/OpenGLContext.hpp"
+#include "Graphics/GraphicsAPI.hpp"
 #include <tracy/Tracy.hpp>
 
 namespace EngineCore
@@ -14,28 +15,41 @@ namespace EngineCore
         if (!SDL_Init(SDL_INIT_VIDEO))
             return CoreErrors::SDL_INIT_FAIL;
 
-        window = SDL_CreateWindow("GameEngine",
-            640, 480,
-            SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetSwapInterval(0);
-
-        if (SDL_GL_CreateContext(window) == NULL)
+        uint64_t flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
+        
+        if (getActiveGraphicsAPI() == GraphicsAPI::OpenGL)
         {
-            Log::fatal(LOGGER_TAG, SDL_GetError());
-            return CoreErrors::SDL_FAILED_TO_CREATE_CONTEXT;
+            flags |= SDL_WINDOW_OPENGL;
+        }
+        else if (getActiveGraphicsAPI() == GraphicsAPI::Vulkan)
+        {
+            flags |= SDL_WINDOW_VULKAN;
         }
 
+        window = SDL_CreateWindow("GameEngine",
+            640, 480,
+            flags
+        );
         
+        if (getActiveGraphicsAPI() == GraphicsAPI::OpenGL)
+        {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+            SDL_GL_SetSwapInterval(0);
+            if (SDL_GL_CreateContext(window) == NULL)
+            {
+                Log::fatal(LOGGER_TAG, "Error creating window: ", SDL_GetError());
+                return CoreErrors::SDL_FAILED_TO_CREATE_CONTEXT;
+            }
+        } 
         Log::flush();
+        /*
         if (initGraphics() != GraphicsErrors::GRAPHICS_OK)
         {
             return CoreErrors::GRAPHICS_FAILED_TO_INIT;
         }
-
+        */
         return CoreErrors::CORE_OK;
     }
 

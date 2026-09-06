@@ -1,5 +1,5 @@
 #pragma once
-#include "IShader.hpp"
+#include "Shader/IShader.hpp"
 #include <d3d12.h>
 #include <wrl/client.h>
 #include <vector>
@@ -13,17 +13,18 @@ namespace EngineCore
         DirectX12Shader() = default;
         DirectX12Shader(ID3D12Device* device, const std::string& fp);
 
-        int load(const std::string& vp, const std::string& fp);
+        //int load(const std::string& vp, const std::string& fp);
+        ShaderErrors getError() const override { return shaderErrorCode; }
+        const std::string& getName() const override { return name; }
     
-        ID3D12RootSignature* getRootSignatire() const { return rootSignature.Get(); }
+        ID3D12RootSignature* getRootSignature() const { return rootSignature.Get(); }
         const D3D12_SHADER_BYTECODE getVertexBytecode() const;
         const D3D12_SHADER_BYTECODE getFragmentBytecode() const;
     private:
 
         bool compileStage(ID3D12Device* device, const std::wstring& path, const std::string& entryPoint,
-                            const std::string& targe, Microsoft::WRL::ComPtr<ID3DBlob>& out);   
+                            const std::string& target, Microsoft::WRL::ComPtr<ID3DBlob>& out);   
         bool createRootSigniture(ID3D12Device* device);
-        
         std::string name;
         ShaderErrors shaderErrorCode = ShaderErrors::SHADER_OK;
 

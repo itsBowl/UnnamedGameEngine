@@ -1,5 +1,5 @@
 #pragma once
-#include "IVertexArray.hpp"
+#include "Buffers/IVertexArray.hpp"
 #include <d3d12.h>
 #include <vector>
 #include <memory>
@@ -16,7 +16,7 @@ namespace EngineCore
         void addIndexBuffer(std::shared_ptr<IIndexBuffer> ibo) override;
 
         uint32_t getIndexCount() const override { return indexCount; }
-
+        const BufferLayout getBufferLayout() const { return layout; }
         const std::vector<D3D12_VERTEX_BUFFER_VIEW> getVertexBufferViews() const { return vertexBufferViews; }
         const D3D12_INDEX_BUFFER_VIEW& getIndexBufferView() const { return indexBufferView; }
         const std::vector<D3D12_INPUT_ELEMENT_DESC>& getInputLayout() const { return inputLayout; }
@@ -28,6 +28,7 @@ namespace EngineCore
         std::vector<D3D12_VERTEX_BUFFER_VIEW> vertexBufferViews;
         D3D12_INDEX_BUFFER_VIEW indexBufferView;
         std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout;
+        BufferLayout layout;
 
         uint32_t indexCount = 0;
     };

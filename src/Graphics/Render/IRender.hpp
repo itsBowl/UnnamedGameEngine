@@ -5,6 +5,7 @@
 #include "Buffers/IVertexArray.hpp"
 #include "Shader/IShader.hpp"
 #include "Buffers/IUniformBuffer.hpp"
+#include "WindowHandle.hpp"
 
 namespace EngineCore
 {
@@ -27,13 +28,6 @@ namespace EngineCore
         }
     };
 
-    struct WindowHandle
-    {
-        void* handle = nullptr;
-        uint32_t width = 0;
-        uint32_t height = 0;
-    };
-
     class IRender
     {
     public:
@@ -41,6 +35,7 @@ namespace EngineCore
 
         virtual void init(const WindowHandle& = {}) = 0;
         virtual void shutdown() = 0;
+        virtual void waitForGPU() = 0;
 
         virtual void beginFrame() = 0;
         virtual void endFrame() = 0;
@@ -48,14 +43,16 @@ namespace EngineCore
         virtual void setClearColour(const glm::vec4& c) = 0;
         virtual void clear() = 0;
 
-        //These functions ran off the end of the screen q_q
+        virtual void draw(std::vector<std::shared_ptr<Mesh>> m, std::shared_ptr<IShader> shader,
+            const std::vector<std::shared_ptr<IUniformBuffer>> uniforms = {}
+        ) = 0;
         virtual void draw(Mesh& m, std::shared_ptr<IShader> shader, 
             const std::vector<std::shared_ptr<IUniformBuffer>> uniformBuffers = {}
         ) = 0;
         virtual void draw(std::shared_ptr<Mesh> m, std::shared_ptr<IShader> shader, 
             const std::vector<std::shared_ptr<IUniformBuffer>> uniformBuffers = {}
         ) = 0;
-        virtual void draw(std::shared_ptr<IVertexArray> vao, std::shared_ptr<IShader> shader, 
+        virtual void draw(std::shared_ptr<IVertexArray> vao, std::shared_ptr<IShader> shader,
             const std::vector<std::shared_ptr<IUniformBuffer>> uniformBuffers = {}, 
             uint32_t idx = 0
         ) = 0;

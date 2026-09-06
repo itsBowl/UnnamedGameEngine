@@ -1,0 +1,27 @@
+cbuffer CameraData : register(b0)
+{
+    float4x4 view;
+    float4x4 proj;
+    float4x4 viewProj;
+    float4 pos;
+};
+
+struct VSInput
+{
+    float3 pos : POSITION;
+    float3 normal : NORMAL;
+};
+
+struct VSOutput
+{
+    float4 pos : SV_POSITION;
+    float3 colour : COLOR;
+};
+
+VSOutput VSMain(VSInput input)
+{
+    VSOutput output;
+    output.pos = mul(proj, mul(view, float4(input.pos, 1.0)));
+    output.colour = input.normal;
+    return output;
+}

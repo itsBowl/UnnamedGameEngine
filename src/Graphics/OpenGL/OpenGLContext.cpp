@@ -1,6 +1,7 @@
 #include "PCH.hpp"
 #include "OpenGLContext.hpp"
 #include "Errors/Errors.hpp"
+#include "Render/WindowHandle.hpp"
 
 
 
@@ -72,6 +73,32 @@ namespace EngineCore
     static const std::string LOGGER_TAG = "Graphics";
 
     OpenGLContext::OpenGLContext(SDL_Window* w): window(w) {}
+
+    OpenGLContext::OpenGLContext() : window(nullptr) {}
+
+    int OpenGLContext::init(const WindowHandle& wh)
+    {
+        if (wh.handle != nullptr)
+        {
+            window = static_cast<SDL_Window*>(wh.handle);
+        }
+        Log::info(LOGGER_TAG, "Initialise gl3w");
+        if (gl3wInit() != GL3W_OK)
+        {
+            int err = GetLastError();
+            Log::fatal(LOGGER_TAG, "Failed to intitialise gl3w: ", err);
+            Log::flush();
+            return GraphicsErrors::GRAPHICS_GL3W_FAILED_TO_INIT;
+        }
+        Log::flush();
+        glEnable(GL_DEBUG_OUTPUT);
+        glDebugMessageCallback(openGLMessageCallback, nullptr);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
+        glCullFace(GL_BACK);
+
+        return GraphicsErrors::GRAPHICS_OK;
+    }
 
     int OpenGLContext::init()
     {

@@ -1,5 +1,5 @@
 #pragma once
-#include "BufferLayout.hpp"
+#include "Buffers/BufferLayout.hpp"
 #include <dxgi.h>
 
 namespace EngineCore

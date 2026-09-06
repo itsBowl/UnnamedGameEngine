@@ -71,7 +71,7 @@ namespace EngineCore
 
     void Camera::createUBO()
     {
-        ubo = GraphicsFactory::createUniformBuffer();
+        ubo = GraphicsFactory::createUniformBuffer(sizeof(uboData));
     }
 
     void Camera::updateUBO()

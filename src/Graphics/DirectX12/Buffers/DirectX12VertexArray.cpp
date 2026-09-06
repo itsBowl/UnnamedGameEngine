@@ -7,10 +7,11 @@ namespace EngineCore
 {
     static const std::string LOGGER_TAG = "DirectX12 Vertex Array";
 
-    void DirectX12VertexArray::addVertexBuffer(std::shared_ptr<IVertexBuffer> vbo, const BufferLayout& layout)
+    void DirectX12VertexArray::addVertexBuffer(std::shared_ptr<IVertexBuffer> vbo, const BufferLayout& _layout)
     {
         D3D12_VERTEX_BUFFER_VIEW view = static_cast<DirectX12VertexBuffer*>(vbo.get())->getView();
 
+        layout = _layout;
         view.StrideInBytes = layout.getStride();
         vertexBufferViews.push_back(view);
 
@@ -27,7 +28,7 @@ namespace EngineCore
             d.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
             d.InstanceDataStepRate = 0;
 
-            inputLayout.push_back(d);
+            //inputLayout.push_back(d);
         }
 
         vertexBuffers.push_back(vbo);

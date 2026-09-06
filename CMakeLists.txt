@@ -67,11 +67,15 @@ file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS
 
 
 if (WIN32)
-    file(GLOB DX12_SOURCES CMAKE_CONFIGURE_DEPENDS
+    file(GLOB DX12_SOURCES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/DirectX12/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/DirectX12/Shader/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/DirectX12/Buffers/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Graphics/DirectX12/Render/*.cpp
         
     )
-    #list(APPEND ENGINE_SOURCES ${DX12_SOURCES})
+    list(APPEND ENGINE_SOURCES ${DX12_SOURCES})
+
 endif()
 
 include_directories(
@@ -140,6 +144,9 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT E
 add_custom_command(TARGET Engine POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/3rdParty/assimp/bin/$<CONFIG>/${ASSIMP_NAME}.dll"
+        "$<TARGET_FILE_DIR:Engine>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/3rdParty/SDL3/lib/x64/SDL3.dll"
         "$<TARGET_FILE_DIR:Engine>"
 )
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "IVertexBuffer.hpp"
+#include "Buffers/IVertexBuffer.hpp"
 #include <d3d12.h>
 #include <wrl/client.h>
 #include <cstdint>

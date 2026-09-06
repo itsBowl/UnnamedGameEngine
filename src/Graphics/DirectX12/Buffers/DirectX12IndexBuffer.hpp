@@ -1,5 +1,5 @@
 #pragma once
-#include "IIndexBuffer.hpp"
+#include "Buffers/IIndexBuffer.hpp"
 #include <d3d12.h>
 #include <wrl/client.h>
 #include <cstdint>

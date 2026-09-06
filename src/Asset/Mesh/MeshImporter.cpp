@@ -69,6 +69,8 @@ namespace EngineCore
 
     std::vector<std::shared_ptr<Mesh>> MeshImporter::import(const std::string& path)
     {
+        Log::info(LOGGER_TAG, "Importing mesh from: ", path);
+        Log::flush();
         std::vector<std::shared_ptr<Mesh>> meshes;
 
         Assimp::Importer importer;

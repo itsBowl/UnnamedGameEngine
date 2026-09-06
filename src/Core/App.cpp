@@ -3,6 +3,8 @@
 #include <tracy/Tracy.hpp>
 #include "GraphicsFactory.hpp"
 #include "Logging/Log.hpp"
+#include "Graphics/GraphicsAPI.hpp"
+#include "SDL3/SDL_properties.h"
 
 
 namespace EngineCore
@@ -27,9 +29,25 @@ namespace EngineCore
             Log::flush();
             return;
         }
-
+        SDL_Window* sdlWindow = window.getWindow();
+        HWND hwnd = static_cast<HWND>(SDL_GetPointerProperty(
+            SDL_GetWindowProperties(sdlWindow),
+            SDL_PROP_WINDOW_WIN32_HWND_POINTER,
+            nullptr
+        ));
+        WindowHandle handle = {};
+        if (getActiveGraphicsAPI() == GraphicsAPI::DirectX12)
+        {
+            handle.handle = hwnd;
+        }
+        else if (getActiveGraphicsAPI() == GraphicsAPI::OpenGL)
+        {
+            handle.handle = sdlWindow;
+        }
+        
+        SDL_GetWindowSize(window.getWindow(), &handle.width, &handle.height);
         inputHandler.init();
-        render->init();
+        render->init(handle);
         PipelineState beginState;
         render->setClearColour(glm::vec4(0.2f, .02f, 0.2f, 1.f));
         render->setPipelineState(beginState);
@@ -54,7 +72,7 @@ namespace EngineCore
         });
         
 
-        
+        Log::flush();
     }
 
     void App::run()
@@ -70,6 +88,7 @@ namespace EngineCore
         std::vector<std::shared_ptr<Mesh>> testModel = assetManager.mesh().load("../Assets/Models/TestRevoker/model.fbx");
         Log::info(Log::Core, "Model VAO: ", testModel.at(0)->getVAO(), " Model IdxCount: ", testModel.at(0)->getIndexCount());
 
+#pragma region testCube
         //test cube
         std::vector<Vertex> vertices = 
         {
@@ -125,7 +144,9 @@ namespace EngineCore
             // Bottom
             20, 21, 22, 22, 23, 20,
         };
-        //squareMesh.create(vertices, indices);
+        squareMesh.create(vertices, indices);
+#pragma endregion
+        
 
         assetManager.shader().debugPrintShaders();
         int value = 1;
@@ -139,7 +160,8 @@ namespace EngineCore
                 }
             }
         ));
-        std::shared_ptr<IUniformBuffer> testUBO = GraphicsFactory::createUniformBuffer();
+
+        std::shared_ptr<IUniformBuffer> testUBO = GraphicsFactory::createUniformBuffer(sizeof(value));
         testUBO->setData(&value, sizeof(value));
 
 
@@ -171,9 +193,12 @@ namespace EngineCore
             testUBO->setData(&value, sizeof(value));
             //assetManager.shader().get("Basic")->setInt("test", value);
             //render->draw(squareMesh);
-            render->draw(testModel.at(0), assetManager.shader().get("Basic"), {camera.getUBO(), testUBO});
+            render->draw(testModel, assetManager.shader().get("Basic"), {camera.getUBO(), testUBO});
             render->endFrame();
-            window.swapBuffers();
+            if (getActiveGraphicsAPI() == GraphicsAPI::OpenGL)
+            {
+                window.swapBuffers();
+            }
             Log::flush();
             FrameMark;
         }

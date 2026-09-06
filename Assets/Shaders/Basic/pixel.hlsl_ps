@@ -1,0 +1,33 @@
+cbuffer TestData : register(b1)
+{
+    int test;
+};
+
+struct PSInput
+{
+    float4 pos : SV_POSITION;
+    float3 colour : COLOR;
+};
+
+float4 PSMain(PSInput input) : SV_TARGET
+{
+    float3 c1 = float3(1.f, 0.f, 0.f);
+    float3 c2 = float3(0.f, 1.f, 0.f);
+    float3 c3 = float3(0.f, 0.f, 1.f);
+    float3 c4 = float3(1.f, 1.f, 1.f);
+
+    float3 vcol = input.colour;
+
+    //return float4(1.0, 0.0, 0.0, 1.0);
+
+    switch(test)
+    {
+        case 1: vcol *= c1; break;
+        case 2: vcol *= c2; break;
+        case 3: vcol *= c3; break;
+        case 4: vcol *= c4; break;
+        default: vcol *= 1.0; break;
+    }
+
+    return float4(vcol, 1.f);
+}

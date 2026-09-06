@@ -21,6 +21,7 @@ namespace EngineCore
     void OpenGLRender::init(const WindowHandle& wh)
     {
         Log::info(LOGGER_TAG, "Initialising OpenGLRender");
+        context.init(wh);
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -51,6 +52,7 @@ namespace EngineCore
     void OpenGLRender::endFrame()
     {
         //figure all this out later
+        context.swapBuffers();
     }
 
     void OpenGLRender::setClearColour(const glm::vec4& colour)
@@ -64,9 +66,17 @@ namespace EngineCore
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
+    void OpenGLRender::draw(std::vector<std::shared_ptr<Mesh>> m, std::shared_ptr<IShader> shader, const std::vector<std::shared_ptr<IUniformBuffer>> ubos)
+    {
+        for (std::shared_ptr<Mesh> _m : m)
+        {
+            draw(_m, shader, ubos);
+        }
+    }
+
     void OpenGLRender::draw(Mesh& m, std::shared_ptr<IShader> shader, std::vector<std::shared_ptr<IUniformBuffer>> ubos)
     {
-        draw(m.getVAO(), shader);
+        draw(m.getVAO(), shader, ubos);
     }
 
     void OpenGLRender::draw(std::shared_ptr<IVertexArray> vao, std::shared_ptr<IShader> shader, 
@@ -84,7 +94,7 @@ namespace EngineCore
         
         glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 
-        ++stats.drawCalls;
+        stats.drawCalls++;
         stats.indexCount += count;
     }
 
