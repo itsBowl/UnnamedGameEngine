@@ -4,6 +4,11 @@ Game engine project looking to support multiple graphics APIs and as a way to ex
 
 The eventual goal is to produce a game in this engine
 
+## Build Instructions:
+- Run `cmake -B build`
+- Go to build folder, run GameEngine.sln
+- Build debug or release from MSVC
+
 ## Current Project Progress:
 ### Graphics
 - OpenGL : Supported
