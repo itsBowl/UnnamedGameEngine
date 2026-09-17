@@ -11,6 +11,12 @@ namespace EngineCore
         ShaderLibrary& shader() { return shaders; }
         TextureLibrary& texture() { return textures; }
         MeshLibrary& mesh() { return meshes; }
+        void clearAssets()
+        {
+            shaders.deleteAll();
+            textures.deleteAll();
+            meshes.deleteAll();
+        }
 
     private:
         ShaderLibrary shaders;

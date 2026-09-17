@@ -328,7 +328,7 @@ namespace EngineCore
         Log::info(LOGGER_TAG, "Create fence");
     }
 
-    void DirectX12Render::dxWaitForGPU()
+    void DirectX12Render::waitForGPU()
     {
         HRESULT sig = commandQueue->Signal(fence.Get(), fenceValues[frameIndex]);
         if (FAILED(sig))

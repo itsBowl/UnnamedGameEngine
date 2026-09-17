@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Window/Window.hpp"
 #include "Events/Events.hpp"
 #include "Errors/Errors.hpp"
@@ -13,6 +14,9 @@
 #include "Graphics/Camera/Camera.hpp"
 
 #include "Asset/AssetManager.hpp"
+
+#include "Scene/Scene.hpp"
+#include "Systems/RenderSystem.hpp"
 
 int main(int argc, char** argv);
 
@@ -32,6 +36,8 @@ namespace EngineCore
         void onKeyPressed(const KeyEvent& e);
         void onMouseMoved(const MouseMoveEvent& e);
 
+        void loadScene(std::unique_ptr<Scene> newScene);
+
         Window window;
         Time time;
         InputHandler inputHandler;
@@ -39,6 +45,9 @@ namespace EngineCore
         std::unique_ptr<IRender> render;
         Mesh squareMesh;
         AssetManager assetManager;
+        std::unique_ptr<Scene> scene;
+        RenderSystem renderSystem;
+
         bool running = false;
 
         friend int ::main(int argc, char** argv);

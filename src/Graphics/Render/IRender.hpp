@@ -35,7 +35,7 @@ namespace EngineCore
 
         virtual void init(const WindowHandle& = {}) = 0;
         virtual void shutdown() = 0;
-        virtual void waitForGPU() = 0;
+        virtual void waitIdle() = 0;
 
         virtual void beginFrame() = 0;
         virtual void endFrame() = 0;

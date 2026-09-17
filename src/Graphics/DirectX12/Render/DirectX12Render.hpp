@@ -17,7 +17,7 @@ namespace EngineCore
     public:
         void init(const WindowHandle& w) override;
         void shutdown() override;
-        void waitForGPU() override { dxWaitForGPU(); }
+        void waitIdle() override { waitForGPU(); }
         void setWindowProps();
 
         void beginFrame() override;
@@ -48,7 +48,7 @@ namespace EngineCore
         void createCommandAllocatorsList();
         void createFence();
 
-        void dxWaitForGPU();
+        void waitForGPU();
         void nextFrame();
 
         //Pipeline state object and caching

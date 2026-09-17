@@ -69,6 +69,6 @@ namespace EngineCore
 
     void ShaderLibrary::deleteAll()
     {
-        
+        shaders.clear();
     }
 }

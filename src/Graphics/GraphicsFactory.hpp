@@ -7,6 +7,8 @@
 #include "Shader/IShader.hpp"
 #include "Texture/ITexture.hpp"
 #include "Buffers/IUniformBuffer.hpp"
+#include "Buffers/IStructuredBuffer.hpp"
+
 
 struct ID3D12Device;
 
@@ -33,6 +35,7 @@ namespace EngineCore
         static std::shared_ptr<IVertexBuffer> createVertexBuffer(const void* data, uint32_t size);
         static std::shared_ptr<IIndexBuffer>  createIndexBuffer (const uint32_t* indices, uint32_t count);
         static std::shared_ptr<IUniformBuffer> createUniformBuffer(uint32_t size = 0);
+        static std::shared_ptr<IStructuredBuffer> createStructedBuffer(uint32_t max, uint32_t stride);
 
     private:
         static ID3D12Device* dXdev;

@@ -57,4 +57,9 @@ namespace EngineCore
         }
         Log::flush();
     }
+
+    void TextureLibrary::deleteAll()
+    {
+        textures.clear();
+    }
 }

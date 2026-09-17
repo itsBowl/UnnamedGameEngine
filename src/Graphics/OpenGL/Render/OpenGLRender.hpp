@@ -7,9 +7,13 @@ namespace EngineCore
     class OpenGLRender : public IRender
     {
     public:
-        void init(const WindowHandle& wh = {});
+        void init(const WindowHandle& wh);
         void shutdown() override;
-        void waitForGPU() override { /*no op for openGL but needed for DX/Vk*/};
+        //OpenGL resource destruction is safe without a wait
+        //but we're being thorough here
+        //this also preseves implementation details across
+        //APIs
+        void waitIdle() override { glFinish(); };
         ~OpenGLRender() override;
 
         void beginFrame() override;

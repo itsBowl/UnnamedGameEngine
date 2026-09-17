@@ -17,6 +17,7 @@ namespace EngineCore
         std::shared_ptr<ITexture> get(const std::string&);
         bool exists(const std::string&) const;
 
+        void deleteAll();
         void debug();
     private:
         std::unordered_map<std::string, std::shared_ptr<ITexture>> textures;

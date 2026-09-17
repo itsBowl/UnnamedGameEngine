@@ -35,6 +35,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(box3d)
 
+FetchContent_Declare(
+    entt
+    GIT_REPOSITORY https://github.com/skypjack/entt.git
+    GIT_TAG v3.13.2
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(entt)
+
 file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Common/*.cpp
@@ -115,6 +123,7 @@ target_link_libraries(Engine
     TracyClient
     glm::glm
     box3d::box3d
+    EnTT::EnTT
     "${CMAKE_SOURCE_DIR}/3rdParty/SDL3/lib/x64/SDL3.lib"
 )
 

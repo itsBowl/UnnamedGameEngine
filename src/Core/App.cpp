@@ -6,6 +6,8 @@
 #include "Graphics/GraphicsAPI.hpp"
 #include "SDL3/SDL_properties.h"
 
+#include "Componenets/RenderDataComponent.hpp"
+
 
 namespace EngineCore
 {
@@ -209,6 +211,8 @@ namespace EngineCore
     void App::shutdown()
     {
         Log::info(Log::Core, "Shut down");
+        render->waitIdle();
+        
         
         Log::flush();
     }
@@ -238,6 +242,12 @@ namespace EngineCore
     {
         //tmp
         //Log::info("ENGINE_CORE", "Mouse moved: ", e.dx, ", ", e.dy);
+    }
+
+    void App::loadScene(std::unique_ptr<Scene> newScene)
+    {
+        scene = std::move(newScene);
+        scene->getRegistry().on_destroy<RenderDataComponent>().connect<&RenderSystem::onRenderDataDestoryed>(renderSystem);
     }
 
 }

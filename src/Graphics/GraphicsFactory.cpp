@@ -17,6 +17,7 @@
 #include "DirectX12/Buffers/DirectX12UniformBuffer.hpp"
 #include "DirectX12/Render/DirectX12Render.hpp"
 #include "DirectX12/Shader/DirectX12Shader.hpp"
+#include "DirectX12/Buffers/DirectX12StrcutredBuffer.hpp"
 #endif
 //TODO:
 // DIRECTX12 GUARD
@@ -140,5 +141,14 @@ namespace EngineCore
         }
         Log::flush();
         return nullptr;
+    }
+
+    std::shared_ptr<IStructuredBuffer> GraphicsFactory::createStructedBuffer(uint32_t max, uint32_t stride)
+    {
+        switch (getActiveGraphicsAPI())
+        {
+            case GraphicsAPI::OpenGL: return std::make_shared<OpenGLUniformBuffer>(max, stride);
+            case GrahpicsAPI::DirectX12: return std::make_shared<DirectX12StrucutredBuffer>(max, stride);
+        }
     }
 }
