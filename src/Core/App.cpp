@@ -7,16 +7,17 @@
 #include "SDL3/SDL_properties.h"
 
 #include "Componenets/RenderDataComponent.hpp"
+#include "Componenets/TransformComponenet.hpp"
+#include "Componenets/MaterialComponent.hpp"
+#include "Componenets/MeshComponent.hpp"
 
 
 namespace EngineCore
 {
-    App::App() : running(false)
-    {
+    App::App(std::string& t) : running(false), title(t)
+    {}
 
-    }
-
-    void App::init()
+    bool App::init()
     {
         Locator::provide(&updateSystem);
         Locator::provide(&inputHandler);
@@ -24,12 +25,12 @@ namespace EngineCore
         Locator::provide(render.get());
         Locator::provide(&time);
         Locator::provide(&assetManager);
-        int errValue = window.init();
+        int errValue = window.init(title);
         if (errValue != CoreErrors::CORE_OK)
         {
             Log::fatal(Log::Core, "Failed to initialise window: ", errValue);
             Log::flush();
-            return;
+            return false;
         }
         SDL_Window* sdlWindow = window.getWindow();
         HWND hwnd = static_cast<HWND>(SDL_GetPointerProperty(
@@ -75,6 +76,8 @@ namespace EngineCore
         
 
         Log::flush();
+
+        return true;
     }
 
     void App::run()
@@ -86,6 +89,12 @@ namespace EngineCore
             return;
         }
         Camera camera(inputHandler, window);
+        scene = std::make_unique<Scene>();
+        Log::info(Log::Core, "About to construct RenderSystem, active API=", (int)getActiveGraphicsAPI());
+        renderSystem.init();
+        Log::info(Log::Core, "RenderSystem constructed OK");
+        Log::flush();
+        //scene->getRegistry().on_destroy<RenderDataComponent>().connect<&RenderSystem::onRenderDataDestoryed>(renderSystem);
 
         std::vector<std::shared_ptr<Mesh>> testModel = assetManager.mesh().load("../Assets/Models/TestRevoker/model.fbx");
         Log::info(Log::Core, "Model VAO: ", testModel.at(0)->getVAO(), " Model IdxCount: ", testModel.at(0)->getIndexCount());
@@ -149,8 +158,45 @@ namespace EngineCore
         squareMesh.create(vertices, indices);
 #pragma endregion
         
-
         assetManager.shader().debugPrintShaders();
+        std::shared_ptr squareShared = std::make_shared<Mesh>(squareMesh);
+
+        std::shared_ptr<IShader> basicShader = assetManager.shader().get("Basic");
+
+        entt::entity cube = scene->createEntity();
+        entt::registry& registry = scene->getRegistry();
+
+        registry.emplace<TransformComponent>(cube);
+        registry.emplace<MeshComponent>(cube, MeshComponent{{squareShared}});
+        registry.emplace<MaterialComponent>(cube, MaterialComponent{basicShader, nullptr});
+        //registry.emplace<RenderDataComponent>(cube, RenderDataComponent{renderSystem.allocateModelIndex()});
+
+
+
+        {
+        entt::entity revoker = scene->createEntity();
+        registry.emplace<TransformComponent>(revoker);
+        registry.emplace<MeshComponent>(revoker, MeshComponent{ {testModel} });
+        registry.emplace<MaterialComponent>(revoker, MaterialComponent{ basicShader, nullptr });
+        //registry.emplace < RenderDataComponent>(revoker, RenderDataComponent{ renderSystem.allocateModelIndex() });
+
+        TransformComponent& tc = registry.get<TransformComponent>(revoker);
+        tc.position.x += 10.f;
+        tc.rotation = glm::vec3(-90.f, 0.f, 0.f);
+        }
+
+        { 
+        entt::entity revoker = scene->createEntity();
+        registry.emplace<TransformComponent>(revoker);
+        registry.emplace<MeshComponent>(revoker, MeshComponent{{testModel}});
+        registry.emplace<MaterialComponent>(revoker, MaterialComponent{basicShader, nullptr});
+        //registry.emplace<RenderDataComponent>(revoker, RenderDataComponent{renderSystem.allocateModelIndex()});
+        TransformComponent& tc = registry.get<TransformComponent>(revoker);
+        tc.position.x -= 10.f;
+        MeshComponent& mc = registry.get<MeshComponent>(revoker);
+        mc.meshes.push_back(squareShared);
+        }
+
         int value = 1;
         InputListener testListener = InputListener(&inputHandler, (EngineCore::ListenerID)inputHandler.onKeyPressed([&value](const KeyEvent& e)
             {
@@ -195,12 +241,9 @@ namespace EngineCore
             testUBO->setData(&value, sizeof(value));
             //assetManager.shader().get("Basic")->setInt("test", value);
             //render->draw(squareMesh);
-            render->draw(testModel, assetManager.shader().get("Basic"), {camera.getUBO(), testUBO});
+            //render->draw(testModel, assetManager.shader().get("Basic"), {camera.getUBO(), testUBO});
+            renderSystem.onUpdate(*scene, *render, camera);
             render->endFrame();
-            if (getActiveGraphicsAPI() == GraphicsAPI::OpenGL)
-            {
-                window.swapBuffers();
-            }
             Log::flush();
             FrameMark;
         }
@@ -247,7 +290,6 @@ namespace EngineCore
     void App::loadScene(std::unique_ptr<Scene> newScene)
     {
         scene = std::move(newScene);
-        scene->getRegistry().on_destroy<RenderDataComponent>().connect<&RenderSystem::onRenderDataDestoryed>(renderSystem);
     }
 
 }

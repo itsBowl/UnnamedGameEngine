@@ -6,6 +6,7 @@
 #include "OpenGL/Buffers/OpenGLVertexArray.hpp"
 #include "Shader/OpenGLShader.hpp"
 #include "Buffers/OpenGLUniformBuffer.hpp"
+#include "Buffers/OpenGLStructuredBuffer.hpp"
 
 namespace EngineCore
 {
@@ -14,7 +15,7 @@ namespace EngineCore
 
     OpenGLRender::~OpenGLRender()
     {
-        Log::info("OpenGLRender destoryed");
+        Log::info(LOGGER_TAG, "OpenGLRender destoryed");
         Log::flush();
     }
 
@@ -51,7 +52,6 @@ namespace EngineCore
 
     void OpenGLRender::endFrame()
     {
-        //figure all this out later
         context.swapBuffers();
     }
 
@@ -79,6 +79,27 @@ namespace EngineCore
         draw(m.getVAO(), shader, ubos);
     }
 
+    void OpenGLRender::drawInstances(std::shared_ptr<Mesh> m, std::shared_ptr<IShader> shader,
+            const std::vector<std::shared_ptr<IUniformBuffer>> ubo, uint32_t instances)
+    {
+        OpenGLVertexArray* vao = static_cast<OpenGLVertexArray*>(m->getVAO().get());
+        vao->bind();
+        static_cast<OpenGLShader*>(shader.get())->bind();
+
+        for (uint32_t i = 0; i < ubo.size(); i++)
+        {
+            static_cast<OpenGLUniformBuffer*>(ubo[i].get())->bindToSlot(i+2);
+        }
+
+        uint32_t count = vao->getIndexCount();
+
+        glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr, instances);
+
+        stats.drawCalls++;
+        stats.indexCount += count;
+    }
+
+
     void OpenGLRender::draw(std::shared_ptr<IVertexArray> vao, std::shared_ptr<IShader> shader, 
         const std::vector<std::shared_ptr<IUniformBuffer>> ubos, uint32_t indexCount)
     {
@@ -87,11 +108,11 @@ namespace EngineCore
 
         for (uint32_t i = 0; i < ubos.size(); i++)
         {
-            static_cast<OpenGLUniformBuffer*>(ubos[i].get())->bindToSlot(i);
+            static_cast<OpenGLUniformBuffer*>(ubos[i].get())->bindToSlot(i+2);
         }
 
         uint32_t count = (indexCount == 0) ? vao->getIndexCount() : indexCount;
-        
+
         glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 
         stats.drawCalls++;
@@ -109,6 +130,12 @@ namespace EngineCore
         static_cast<OpenGLVertexArray*>(vao.get())->bind();
         glDrawArrays(GL_TRIANGLES, 0, vertexCount);
         stats.drawCalls++;
+    }
+
+    void OpenGLRender::frameData(std::shared_ptr<IUniformBuffer> camera, std::shared_ptr<IStructuredBuffer> models)
+    {
+        static_cast<OpenGLUniformBuffer*>(camera.get())->bindToSlot(0);
+        static_cast<OpenGLStructuredBuffer*>(models.get())->bindToSlot(1);
     }
 
     void OpenGLRender::setViewport(int x, int y, int w, int h)

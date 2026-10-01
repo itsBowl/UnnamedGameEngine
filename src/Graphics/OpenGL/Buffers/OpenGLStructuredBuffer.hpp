@@ -16,8 +16,8 @@ namespace EngineCore
         void bindToSlot(uint32_t slot) const;
 
     private:
-        uint32_t ssbo = 0;
+        uint32_t id = 0;
         uint32_t elementCount = 0;
-        uint32_t capacityBytes = 0;
+        size_t capacityBytes = 0;
     };
 }

@@ -5,6 +5,7 @@
 #include "Buffers/IVertexArray.hpp"
 #include "Shader/IShader.hpp"
 #include "Buffers/IUniformBuffer.hpp"
+#include "Buffers/IStructuredBuffer.hpp"
 #include "WindowHandle.hpp"
 
 namespace EngineCore
@@ -56,9 +57,14 @@ namespace EngineCore
             const std::vector<std::shared_ptr<IUniformBuffer>> uniformBuffers = {}, 
             uint32_t idx = 0
         ) = 0;
+        virtual void drawInstances(std::shared_ptr<Mesh> m, std::shared_ptr<IShader> shader,
+            const std::vector<std::shared_ptr<IUniformBuffer>> ubo = {}, uint32_t count = 0
+        ) = 0;
         virtual void drawArrays(std::shared_ptr<IVertexArray>, uint32_t verts,
             const std::vector<std::shared_ptr<IUniformBuffer>> ubos = {}
         ) = 0;
+
+        virtual void frameData(std::shared_ptr<IUniformBuffer> camera, std::shared_ptr<IStructuredBuffer> models) = 0;
 
         virtual void setViewport(int x, int y, int w, int h) = 0;
 

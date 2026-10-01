@@ -14,7 +14,7 @@ namespace EngineCore
         {
             return window;
         }
-        int init();
+        int init(std::string& title);
         int initGraphics();
 
         SDL_Window* getWindow() {return window;}

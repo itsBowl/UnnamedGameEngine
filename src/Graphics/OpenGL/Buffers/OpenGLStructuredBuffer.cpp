@@ -7,20 +7,20 @@ namespace EngineCore
 
     OpenGLStructuredBuffer::OpenGLStructuredBuffer()
     {
-        glGenBuffers(1, &ssbo);
+        glGenBuffers(1, &id);
     }
 
     OpenGLStructuredBuffer::~OpenGLStructuredBuffer()
     {
-        glDeleteBuffers(0, &ssbo);
+        glDeleteBuffers(1, &id);
     }
 
     void OpenGLStructuredBuffer::setData(const void* data, uint32_t count, uint32_t stride)
     {
         elementCount = count;
-        uint32_t requiredBytes = count * stride;
+        size_t requiredBytes = count * stride;
 
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
 
         if (requiredBytes > capacityBytes)
         {
@@ -37,6 +37,6 @@ namespace EngineCore
 
     void OpenGLStructuredBuffer::bindToSlot(uint32_t slot) const
     {
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, slot, ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, slot, id);
     }
 }

@@ -13,6 +13,7 @@ namespace EngineCore
 
         void setData(const void* data, uint32_t count, uint32_t stride);
         uint32_t getElementCount() const override { return elementCount; }
+        ID3D12DescriptorHeap* getHeap() { return heap.Get(); }
 
         D3D12_GPU_DESCRIPTOR_HANDLE getHandle() const { return gpuHandle; }
 

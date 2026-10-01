@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 namespace EngineCore
 {
@@ -12,4 +13,5 @@ namespace EngineCore
 
     void setActiveGraphicsAPI(GraphicsAPI api);
     GraphicsAPI getActiveGraphicsAPI();
+    std::string getAPIString();
 }

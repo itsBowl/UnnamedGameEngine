@@ -21,7 +21,7 @@ namespace EngineCore
 
     std::shared_ptr<IShader> ShaderLibrary::load(const std::string& fp)
     {
-        std::cout << "Loading a shader\n";
+        Log::info(LOGGER_TAG, "Loading a shader from ", fp);
         std::shared_ptr<IShader> shader = GraphicsFactory::createShader(fp);
         ShaderErrors err = shader->getError();
         if (err != ShaderErrors::SHADER_OK)
@@ -29,6 +29,7 @@ namespace EngineCore
             return nullptr;
         }
         add(shader);
+        Log::flush();
         return shader;
     }
 

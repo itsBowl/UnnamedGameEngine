@@ -1,4 +1,4 @@
-#include "DirectX12StrcutredBuffer.hpp"
+#include "DirectX12StructuredBuffer.hpp"
 #include "Log.hpp"
 
 

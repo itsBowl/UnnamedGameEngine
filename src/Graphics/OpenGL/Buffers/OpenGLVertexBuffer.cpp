@@ -38,6 +38,7 @@ namespace EngineCore
     {
         bind();
         glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+        unbind();
     }
 
     void OpenGLVertexBuffer::destory()

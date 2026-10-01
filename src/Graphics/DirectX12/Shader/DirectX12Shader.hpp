@@ -25,6 +25,7 @@ namespace EngineCore
         bool compileStage(ID3D12Device* device, const std::wstring& path, const std::string& entryPoint,
                             const std::string& target, Microsoft::WRL::ComPtr<ID3DBlob>& out);   
         bool createRootSigniture(ID3D12Device* device);
+        D3D12_ROOT_PARAMETER1 createRootParameter(D3D12_ROOT_PARAMETER_TYPE t, UINT sr, UINT rs, D3D12_SHADER_VISIBILITY v);
         std::string name;
         ShaderErrors shaderErrorCode = ShaderErrors::SHADER_OK;
 

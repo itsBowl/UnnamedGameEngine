@@ -2,6 +2,7 @@
 #include "DirectX12/Shader/DirectX12Shader.hpp"
 #include "DirectX12/Buffers/DirectX12VertexArray.hpp"
 #include "DirectX12/Buffers/DirectX12UniformBuffer.hpp"
+#include "DirectX12/Buffers/DirectX12StructuredBuffer.hpp"
 #include "DirectX12/Buffers/DirectX12DataTypes.hpp"
 #include "Asset/Mesh/Mesh.hpp"
 #include "Graphics/GraphicsFactory.hpp"
@@ -450,7 +451,6 @@ namespace EngineCore
         }
         stats.drawCalls = 0;
         stats.indexCount = 0;
-        Log::info(LOGGER_TAG, "End of frame");
         Log::flush();
         nextFrame();
     }
@@ -481,7 +481,6 @@ namespace EngineCore
 
         commandList->RSSetViewports(1, &viewport);
         commandList->RSSetScissorRects(1, &scissorRect);
-        Log::info(LOGGER_TAG, "Set viewport: ", x, " ", y, " ", w, " ", h);
     }
 
     ID3D12PipelineState* DirectX12Render::getOrCreatePSO(const PipelineState& state, DirectX12Shader* s, std::shared_ptr<IVertexArray> _vao)
@@ -554,7 +553,7 @@ namespace EngineCore
         HRESULT res = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso));
         if (FAILED(res))
         {
-            Log::error(LOGGER_TAG, "Failed to create pipelien state object for shader: ", s->getName());
+            Log::error(LOGGER_TAG, "Failed to create pipeline state object for shader: ", s->getName(), " ", res);
             Log::flush();
             return nullptr;
         }
@@ -617,6 +616,38 @@ namespace EngineCore
         draw(m->getVAO(), s, ubos);
     }
 
+    void DirectX12Render::drawInstances(std::shared_ptr<Mesh> m, std::shared_ptr<IShader> s, std::vector<std::shared_ptr<IUniformBuffer>> ubo, uint32_t instances)
+    {
+        DirectX12Shader* shader = static_cast<DirectX12Shader*>(s.get());
+        DirectX12VertexArray* array = static_cast<DirectX12VertexArray*>(m->getVAO().get());
+
+        ID3D12PipelineState* pso = getOrCreatePSO(pipelineState, shader, m->getVAO());
+        commandList->SetPipelineState(pso);
+        commandList->SetGraphicsRootSignature(shader->getRootSignature());
+
+        commandList->SetGraphicsRootConstantBufferView(0, cameraBuffer->getGPUAddress());
+        
+        ID3D12DescriptorHeap* heaps[] = {modelsBuffer->getHeap()};
+        commandList->SetDescriptorHeaps(1, heaps);
+        commandList->SetGraphicsRootDescriptorTable(2, modelsBuffer->getHandle());
+
+        for (uint32_t i = 0; i < ubo.size(); i++)
+        {
+            DirectX12UniformBuffer* u = static_cast<DirectX12UniformBuffer*>(ubo[i].get());
+            commandList->SetGraphicsRootConstantBufferView(i + 1, u->getGPUAddress());
+        }
+
+        const std::vector<D3D12_VERTEX_BUFFER_VIEW>& views = array->getVertexBufferViews();
+        commandList->IASetVertexBuffers(0, static_cast<UINT>(views.size()), views.data());
+        commandList->IASetIndexBuffer(&array->getIndexBufferView());
+        commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+        commandList->DrawIndexedInstanced(array->getIndexCount(), instances, 0, 0, 0);
+
+        stats.drawCalls++;
+        stats.indexCount += array->getIndexCount() * instances;
+    }
+
     void DirectX12Render::draw(std::shared_ptr<IVertexArray> vao, std::shared_ptr<IShader> s, std::vector<std::shared_ptr<IUniformBuffer>> ubo, uint32_t indexCount)
     {
         DirectX12VertexArray* array = static_cast<DirectX12VertexArray*>(vao.get());
@@ -651,4 +682,9 @@ namespace EngineCore
         stats.drawCalls++;
     }
 
+    void DirectX12Render::frameData(std::shared_ptr<IUniformBuffer> camera, std::shared_ptr<IStructuredBuffer> models)
+    {
+        cameraBuffer = static_cast<DirectX12UniformBuffer*>(camera.get());
+        modelsBuffer = static_cast<DirectX12StructuredBuffer*>(models.get()); 
+    }
 }

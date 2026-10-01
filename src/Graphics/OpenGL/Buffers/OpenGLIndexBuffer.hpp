@@ -16,6 +16,7 @@ namespace EngineCore
         void unbind() const;
         void destory();
         uint32_t getCount() const override { return count; }
+        uint32_t getID() { return id; }
         bool exists() const { return id != 0; }
     private:
         uint32_t id = 0;

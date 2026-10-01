@@ -40,7 +40,12 @@ namespace EngineCore
     void OpenGLVertexArray::addVertexBuffer(std::shared_ptr<IVertexBuffer> vbo, const BufferLayout& layout)
     {
         bind();
-        static_cast<OpenGLVertexBuffer*>(vbo.get())->bind();
+        OpenGLVertexBuffer* buf = static_cast<OpenGLVertexBuffer*>(vbo.get());
+
+        //this swaps over to the size of the 
+        uint32_t bindingIndex = static_cast<uint32_t>(vertexBuffers.size());
+
+        glVertexArrayVertexBuffer(id, bindingIndex, buf->getID(), 0, layout.getStride());
 
         for (const BufferElement& e : layout.getElements())
         {
@@ -50,34 +55,55 @@ namespace EngineCore
 
             if (type == GL_INT || type == GL_BOOL)
             {
-                glVertexAttribIPointer(
+                // this is the old way of doing things
+                // glVertexAttribIPointer(
+                //     attributeIndex,
+                //     comps, type, stride,
+                //     reinterpret_cast<const void*>(e.offset)
+                // );
+                
+                glVertexArrayAttribIFormat(
+                    id,
                     attributeIndex,
-                    comps, type, stride,
-                    reinterpret_cast<const void*>(e.offset)
+                    comps,
+                    type,
+                    e.offset
                 );
             }
             else
             {
-                glVertexAttribPointer(
+                // old method
+                // glVertexAttribPointer(
+                //     attributeIndex,
+                //     comps, type, e.normalised ? GL_TRUE : GL_FALSE,
+                //     stride,
+                //     reinterpret_cast<const void*>(e.offset)
+                // );
+
+                glVertexArrayAttribFormat(
+                    id,
                     attributeIndex,
-                    comps, type, e.normalised ? GL_TRUE : GL_FALSE,
-                    stride,
-                    reinterpret_cast<const void*>(e.offset)
+                    comps,
+                    type,
+                    e.normalised ? GL_TRUE : GL_FALSE,
+                    e.offset
                 );
             }
-            glEnableVertexAttribArray(attributeIndex);
+            glVertexArrayAttribBinding(id, attributeIndex, bindingIndex);
+            glEnableVertexArrayAttrib(id, attributeIndex);
             attributeIndex++;
         }
-        vertexBuffer = vbo;
+        vertexBuffers.push_back(vbo);
+        unbind();
 
     }
 
     void OpenGLVertexArray::addIndexBuffer(std::shared_ptr<IIndexBuffer> ibo)
     {
-        bind();
-        static_cast<OpenGLIndexBuffer*>(ibo.get())->bind();
         indexBuffer = ibo;
         indexCount = ibo->getCount();
+        glVertexArrayElementBuffer(id, static_cast<OpenGLIndexBuffer*>(ibo.get())->getID());
+        
     }
 
     void OpenGLVertexArray::destroy()

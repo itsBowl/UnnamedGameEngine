@@ -4,6 +4,8 @@
 #include "Logging/Log.hpp"
 #include "Graphics/GraphicsFactory.hpp"
 
+#include <glm/gtx/string_cast.hpp>
+
 
 namespace EngineCore
 {
@@ -86,7 +88,7 @@ namespace EngineCore
 
     void Camera::onUpdate(float dT)
     {
-        Log::info(LOGGER_TAG, "Camera Update");
+        //Log::info(LOGGER_TAG, "Camera Update\nPos: ", glm::to_string(position), " Rot: ", pitch, ", ", yaw);
         float speed = 3.f; // get frametime
 
         glm::mat4 lookAt;

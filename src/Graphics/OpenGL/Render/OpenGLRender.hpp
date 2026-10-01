@@ -26,8 +26,10 @@ namespace EngineCore
         void draw(Mesh& m, std::shared_ptr<IShader> shader, const std::vector<std::shared_ptr<IUniformBuffer>> ubos = {}) override;
         void draw(std::shared_ptr<Mesh> m, std::shared_ptr<IShader> shader, const std::vector<std::shared_ptr<IUniformBuffer>> ubos = {}) override;
         void draw(std::shared_ptr<IVertexArray> vao, std::shared_ptr<IShader> shader, const std::vector<std::shared_ptr<IUniformBuffer>> ubos = {}, uint32_t indexCount = 0) override;
+        void drawInstances(std::shared_ptr<Mesh> m, std::shared_ptr<IShader> shader, const std::vector<std::shared_ptr<IUniformBuffer>> ubo = {}, uint32_t count = 0) override;
         void drawArrays(std::shared_ptr<IVertexArray> vao, uint32_t vertexCount, const std::vector<std::shared_ptr<IUniformBuffer>> ubos = {}) override;
 
+        void frameData(std::shared_ptr<IUniformBuffer> camera, std::shared_ptr<IStructuredBuffer> models) override;
         void setViewport(int x, int y, int w, int h) override;
         void setPipelineState(const PipelineState& s) override;
         const PipelineState& getPipelineState() const override;

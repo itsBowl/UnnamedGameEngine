@@ -11,6 +11,8 @@ namespace EngineCore
     class Mesh;
     class IShader;
     class DirectX12Shader;
+    class DirectX12UniformBuffer;
+    class DirectX12StructuredBuffer;
 
     class DirectX12Render : public IRender
     {
@@ -30,8 +32,10 @@ namespace EngineCore
         void draw(Mesh& m, std::shared_ptr<IShader> s, std::vector<std::shared_ptr<IUniformBuffer>> ubo = {}) override;
         void draw(std::shared_ptr<Mesh> m, std::shared_ptr<IShader> s, std::vector<std::shared_ptr<IUniformBuffer>> ubo = {}) override;
         void draw(std::shared_ptr<IVertexArray> vao, std::shared_ptr<IShader> s, std::vector<std::shared_ptr<IUniformBuffer>> ubo = {}, uint32_t indexCount = 0) override;
+        void drawInstances(std::shared_ptr<Mesh> m, std::shared_ptr<IShader> s, const std::vector<std::shared_ptr<IUniformBuffer>> ubos = {}, uint32_t count = 0) override;
         void drawArrays(std::shared_ptr<IVertexArray> vao, uint32_t verts, std::vector<std::shared_ptr<IUniformBuffer>> ubo = {}) override;
 
+        void frameData(std::shared_ptr<IUniformBuffer> camera, std::shared_ptr<IStructuredBuffer> models) override;
         void setViewport(int x, int y, int w, int h) override;
         void setPipelineState(const PipelineState& p);
         const PipelineState& getPipelineState() const { return pipelineState; };
@@ -108,6 +112,9 @@ namespace EngineCore
         D3D12_VIEWPORT viewport = {};
         D3D12_RECT scissorRect = {};
         glm::vec4 clearColour = glm::vec4(1.f, .4f, .2f, 1.f);
+
+        DirectX12UniformBuffer* cameraBuffer;
+        DirectX12StructuredBuffer* modelsBuffer;
         
     };
 }

@@ -69,6 +69,9 @@ file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Asset/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Asset/Mesh/*.cpp
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Systems/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Scene/*.cpp
+    
     
 )
 

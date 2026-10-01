@@ -1,6 +1,7 @@
-cbuffer TestData : register(b1)
+cbuffer DrawData : register(b1)
 {
-    int test;
+    uint index;
+    uint batchID;
 };
 
 struct PSInput
@@ -8,6 +9,20 @@ struct PSInput
     float4 pos : SV_POSITION;
     float3 colour : COLOR;
 };
+
+float3 hsv2rgb(float3 c) {
+    float4 K = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    float3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+
+float3 debugColor(uint id)
+{
+    //magic is 1/phi 
+    float hue = frac(float(id) * 0.61803398875);
+    return hsv2rgb(float3(hue, 0.8, 1.0));
+}
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
@@ -20,14 +35,5 @@ float4 PSMain(PSInput input) : SV_TARGET
 
     //return float4(1.0, 0.0, 0.0, 1.0);
 
-    switch(test)
-    {
-        case 1: vcol *= c1; break;
-        case 2: vcol *= c2; break;
-        case 3: vcol *= c3; break;
-        case 4: vcol *= c4; break;
-        default: vcol *= 1.0; break;
-    }
-
-    return float4(vcol, 1.f);
+    return float4(debugColor(batchID), 1.f);
 }

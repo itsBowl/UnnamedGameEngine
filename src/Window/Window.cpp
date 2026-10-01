@@ -9,7 +9,7 @@
 namespace EngineCore
 {
     static const std::string LOGGER_TAG = "Window";
-    int Window::init()
+    int Window::init(std::string& title)
     {
         Log::info(LOGGER_TAG, "Initialising SDL");
         if (!SDL_Init(SDL_INIT_VIDEO))
@@ -26,7 +26,7 @@ namespace EngineCore
             flags |= SDL_WINDOW_VULKAN;
         }
 
-        window = SDL_CreateWindow("GameEngine",
+        window = SDL_CreateWindow(title.c_str(),
             640, 480,
             flags
         );

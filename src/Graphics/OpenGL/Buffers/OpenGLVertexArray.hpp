@@ -23,7 +23,7 @@ namespace EngineCore
         uint32_t id = 0;
         uint32_t attributeIndex = 0;
         uint32_t indexCount = 0;
-        std::shared_ptr<IVertexBuffer> vertexBuffer;
+        std::vector<std::shared_ptr<IVertexBuffer>> vertexBuffers;
         std::shared_ptr<IIndexBuffer> indexBuffer;
     };
 }

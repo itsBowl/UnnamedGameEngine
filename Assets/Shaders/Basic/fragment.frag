@@ -2,35 +2,30 @@
 in vec3 vertexCol;
 layout(location = 0) out vec4 fragColour;
 
-layout(std140, binding = 1) uniform uboTest
+layout(std140, binding = 2) uniform modelIndex
 {
-    int test;
+    uint index;
+    uint hash;
 };
 
-vec3 col1 = vec3(1.f, 0.f, 0.f);
-vec3 col2 = vec3(0.f, 1.f, 0.f);
-vec3 col3 = vec3(0.f, 0.f, 1.0);
-vec3 col4 = vec3(1.f, 1.f, 1.f);
+vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+
+vec3 debugColor(uint id)
+{
+    //magic is 1/phi 
+    float hue = fract(float(id) * 0.61803398875);
+    return hsv2rgb(vec3(hue, 0.8, 1.0));
+}
 
 
 void main()
 {
-    vec3 vcol = vertexCol;
-    switch (test)
-    {
-        case 1:
-            vcol *= col1;
-            break;
-        case 2:
-            vcol *= col2;
-            break;
-        case 3:
-            vcol *= col3;
-            break;
-        case 4:
-            vcol *= col4;
-            break;
-    }
-    fragColour = vec4(vcol, 1.0);
+    float hue = fract(float(hash) * 0.61803398875);
+    fragColour = vec4(debugColor(hash), 1.0);
 }
 

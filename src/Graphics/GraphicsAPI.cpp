@@ -13,4 +13,15 @@ namespace EngineCore
     {
         return activeAPI;
     }
+
+    std::string getAPIString()
+    {
+        switch (activeAPI)
+        {
+            case GraphicsAPI::OpenGL: return "OpenGL";
+            case GraphicsAPI::DirectX12: return "DX12";
+            case GraphicsAPI::Vulkan: return "Vk";
+            case GraphicsAPI::None: return "None?";
+        }
+    }
 }

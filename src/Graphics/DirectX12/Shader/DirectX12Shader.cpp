@@ -94,27 +94,48 @@ namespace EngineCore
         return true;
     }
 
+    D3D12_ROOT_PARAMETER1 DirectX12Shader::createRootParameter(D3D12_ROOT_PARAMETER_TYPE t, UINT shaderRegister, UINT registerSpace, D3D12_SHADER_VISIBILITY v)
+    {
+        D3D12_ROOT_PARAMETER1 p = {};
+        p.ParameterType = t;
+        p.Descriptor.ShaderRegister = shaderRegister;
+        p.Descriptor.RegisterSpace = registerSpace;
+        p.ShaderVisibility = v;
+        return p;
+    }
+
     bool DirectX12Shader::createRootSigniture(ID3D12Device* d)
     {
         //ROOT SIGNITURE:
         //b0 = camera UBO
         //b1 = model matrix
+        //b2 = test register (to be replaced with DrawData)
+        //t0 = model matricies
 
-        D3D12_ROOT_PARAMETER1 rootParam[2] = {};
+        D3D12_ROOT_PARAMETER1 rootParam[3] = {};
+        
+        //camera (b0)
+        rootParam[0] = createRootParameter(D3D12_ROOT_PARAMETER_TYPE_CBV, 0, 0, D3D12_SHADER_VISIBILITY_ALL);
 
-        rootParam[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-        rootParam[0].Descriptor.ShaderRegister = 0;
-        rootParam[0].Descriptor.RegisterSpace = 0;
-        rootParam[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        //DrawData (b1)
+        rootParam[1] = createRootParameter(D3D12_ROOT_PARAMETER_TYPE_CBV, 1, 0, D3D12_SHADER_VISIBILITY_ALL);
 
-        rootParam[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-        rootParam[1].Descriptor.ShaderRegister = 1;
-        rootParam[1].Descriptor.RegisterSpace = 0;
-        rootParam[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        //models storage (t0)
+        D3D12_DESCRIPTOR_RANGE1 srvRange = {};
+        srvRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+        srvRange.NumDescriptors = 1;
+        srvRange.BaseShaderRegister = 0;
+        srvRange.RegisterSpace = 0;
+        srvRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC;
+
+        rootParam[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+        rootParam[2].DescriptorTable.NumDescriptorRanges = 1;
+        rootParam[2].DescriptorTable.pDescriptorRanges = &srvRange;
+        rootParam[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 
         D3D12_VERSIONED_ROOT_SIGNATURE_DESC rsd = {};
         rsd.Version = D3D_ROOT_SIGNATURE_VERSION_1_1;
-        rsd.Desc_1_1.NumParameters = 2;
+        rsd.Desc_1_1.NumParameters = 3;
         rsd.Desc_1_1.pParameters = rootParam;
         rsd.Desc_1_1.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
@@ -135,14 +156,13 @@ namespace EngineCore
             return false;
         }
 
-        HRESULT res1 = d->CreateRootSignature(
+        res = d->CreateRootSignature(
             0, 
             signiture->GetBufferPointer(),
             signiture->GetBufferSize(),
             IID_PPV_ARGS(&rootSignature)
         );
-
-        bool createdRoot = SUCCEEDED(res1);
+        bool createdRoot = SUCCEEDED(res);
 
         return createdRoot;
     }

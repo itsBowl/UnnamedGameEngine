@@ -1,10 +1,24 @@
+//we use row major here so the APIs on the CPU side don't have to do any transposition
 cbuffer CameraData : register(b0)
 {
-    float4x4 view;
-    float4x4 proj;
-    float4x4 viewProj;
+    row_major float4x4 view;
+    row_major float4x4 proj;
+    row_major float4x4 viewProj;
     float4 pos;
 };
+
+cbuffer DrawData : register(b1)
+{
+    uint index;
+    uint batchID;
+};
+
+struct mat4
+{
+    row_major float4x4 mat;
+};
+
+StructuredBuffer<mat4> matrixBuffer : register(t0);
 
 struct VSInput
 {
@@ -18,10 +32,11 @@ struct VSOutput
     float3 colour : COLOR;
 };
 
-VSOutput VSMain(VSInput input)
+VSOutput VSMain(VSInput input, uint instanceID : SV_InstanceID)
 {
     VSOutput output;
-    output.pos = mul(proj, mul(view, float4(input.pos, 1.0)));
+    float4x4 model = matrixBuffer[index + instanceID].mat;
+    output.pos = mul(float4(input.pos, 1.0), mul(model, mul(view, proj)));
     output.colour = input.normal;
     return output;
 }

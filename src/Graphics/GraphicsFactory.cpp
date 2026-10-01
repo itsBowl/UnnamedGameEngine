@@ -8,6 +8,7 @@
 #include "OpenGL/Render/OpenGLRender.hpp"
 #include "OpenGL/Shader/OpenGLShader.hpp"
 #include "OpenGL/Texture/OpenGLTexture.hpp"
+#include "OpenGL/Buffers/OpenGLStructuredBuffer.hpp"
 //DirectX 12 THIS NEEDS ITS GUARD
 #ifdef DX_12_SUPPORT
 #include <d3d12.h>
@@ -17,7 +18,7 @@
 #include "DirectX12/Buffers/DirectX12UniformBuffer.hpp"
 #include "DirectX12/Render/DirectX12Render.hpp"
 #include "DirectX12/Shader/DirectX12Shader.hpp"
-#include "DirectX12/Buffers/DirectX12StrcutredBuffer.hpp"
+#include "DirectX12/Buffers/DirectX12StructuredBuffer.hpp"
 #endif
 //TODO:
 // DIRECTX12 GUARD
@@ -147,8 +148,8 @@ namespace EngineCore
     {
         switch (getActiveGraphicsAPI())
         {
-            case GraphicsAPI::OpenGL: return std::make_shared<OpenGLUniformBuffer>(max, stride);
-            case GrahpicsAPI::DirectX12: return std::make_shared<DirectX12StrucutredBuffer>(max, stride);
+            case GraphicsAPI::OpenGL: return std::make_shared<OpenGLStructuredBuffer>();
+            case GraphicsAPI::DirectX12: return std::make_shared<DirectX12StructuredBuffer>(dXdev, max, stride);
         }
     }
 }

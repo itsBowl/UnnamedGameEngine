@@ -42,6 +42,10 @@ namespace EngineCore
         for(unsigned int i = 0; i < mesh->mNumFaces; i++)
         {
             const aiFace& f = mesh->mFaces[i];
+            if (f.mNumIndices != 3)
+            {
+                continue;
+            }
             for (unsigned int j = 0; j < f.mNumIndices; j++)
             {
                 index.push_back(f.mIndices[j]);
@@ -85,13 +89,14 @@ namespace EngineCore
 
         if (scene == nullptr || (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) != 0 || scene->mRootNode == nullptr)
         {
-            Log::error(LOGGER_TAG, "Assimp failed to laod: ", path, " ", importer.GetErrorString());
+            Log::error(LOGGER_TAG, "Assimp failed to load: ", path);
+            Log::error(LOGGER_TAG, importer.GetErrorString());
             return meshes;
         }
 
         processNode(scene->mRootNode, scene, meshes);
 
-        Log::info(LOGGER_TAG, "Imported: ", meshes.size(), "meshes from: ", path);
+        Log::info(LOGGER_TAG, "Imported: ", meshes.size(), " meshes from: ", path);
 
         return meshes;
 

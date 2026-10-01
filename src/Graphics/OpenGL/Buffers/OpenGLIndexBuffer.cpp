@@ -17,11 +17,12 @@ namespace EngineCore
     void OpenGLIndexBuffer::create(const uint32_t* idx, uint32_t c, GLenum usage)
     {
         count = c;
-        glGenBuffers(1, &id);
-        bind();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), idx, usage);
+        glCreateBuffers(1, &id);
+        glNamedBufferData(id, count * sizeof(uint32_t), idx, usage);
+        //bind();
+        //glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), idx, usage);
         Log::info(LOGGER_TAG, "Created IBO: ", id, " count: ", count);
-        unbind();
+        //unbind();
     }
 
     void OpenGLIndexBuffer::bind() const

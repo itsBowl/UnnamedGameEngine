@@ -25,7 +25,7 @@ namespace EngineCore
 
         if (meshes.empty())
         {
-            Log::error(LOGGER_TAG, "failed to import mesh from: ", path);
+            Log::error(LOGGER_TAG, "failed to import mesh from: ", path, " meshes was empty");
             return meshes;
         }
         add(path, meshes);

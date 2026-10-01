@@ -25,11 +25,11 @@ namespace EngineCore
     class App
     {
     public:
-        App();
+        App(std::string& t);
         
     private:
         void run();
-        void init();
+        bool init();
         void shutdown();
         void onWindowClose();
         void onWindowResize(int w, int h);
@@ -49,6 +49,7 @@ namespace EngineCore
         RenderSystem renderSystem;
 
         bool running = false;
+        std::string title;
 
         friend int ::main(int argc, char** argv);
 
